@@ -1,76 +1,58 @@
-import { auth } from "../firebase/config";
-import { Wallet } from "lucide-react";
+import { Crown } from "lucide-react";
 
 export default function MemberContribution({ group }) {
-  const transactions = group.transactions || [];
-
-  const deposits = transactions.filter(
-    (tx) => tx.type === "deposit"
-  );
+  const members = group.members || [];
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-6">
-        <div className="bg-red-500 text-white p-3 rounded-2xl">
-          <Wallet size={20} />
-        </div>
+      <h2 className="text-2xl font-bold text-red-600 mb-6">
+        Group Members
+      </h2>
 
-        <div>
-          <h2 className="text-2xl font-bold text-red-600">
-            Deposit History
-          </h2>
-          <p className="text-slate-500">
-            Shared wallet contribution activity
-          </p>
-        </div>
-      </div>
-
-      {deposits.length === 0 ? (
-        <div className="bg-[#fff8f2] rounded-2xl p-6 border border-red-100 text-slate-500">
-          No wallet contributions yet.
-        </div>
+      {members.length === 0 ? (
+        <p className="text-slate-500">
+          No members yet.
+        </p>
       ) : (
         <div className="space-y-4">
-          {deposits
-            .slice()
-            .reverse()
-            .map((tx, index) => (
-              <div
-                key={index}
-                className="bg-[#fff8f2] border border-red-100 rounded-2xl p-5 flex items-center justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <img
-                    src={
-                      tx.userPhoto ||
-                      "https://ui-avatars.com/api/?name=User"
-                    }
-                    alt="avatar"
-                    className="w-14 h-14 rounded-full border"
-                  />
+          {members.map((member, index) => (
+            <div
+              key={index}
+              className="bg-[#fff8f2] border border-red-100 rounded-2xl p-5 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-4">
+                <img
+                  src={
+                    member.photo ||
+                    "https://ui-avatars.com/api/?name=User"
+                  }
+                  alt="profile"
+                  className="w-14 h-14 rounded-full border"
+                />
 
-                  <div>
-                    <h3 className="font-bold text-slate-900">
-                      {tx.userName || "SmartSplit User"}
-                    </h3>
+                <div>
+                  <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                    {member.name}
 
-                    <p className="text-slate-500 text-sm">
-                      Added money via {tx.source || "Wallet"}
-                    </p>
-                  </div>
-                </div>
+                    {member.role === "admin" && (
+                      <Crown
+                        size={16}
+                        className="text-yellow-500"
+                      />
+                    )}
+                  </h3>
 
-                <div className="text-right">
-                  <p className="text-2xl font-black text-green-600">
-                    +₹{tx.amount}
-                  </p>
-
-                  <p className="text-xs text-slate-400">
-                    {new Date(tx.createdAt).toLocaleDateString()}
+                  <p className="text-slate-500 text-sm">
+                    {member.email}
                   </p>
                 </div>
               </div>
-            ))}
+
+              <span className="text-sm font-semibold text-red-500 capitalize">
+                {member.role}
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>

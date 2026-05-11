@@ -18,6 +18,9 @@ import ExpenseInsights from "../components/ExpenseInsights";
 import ExpenseChart from "../components/ExpenseChart";
 import MemberContribution from "../components/MemberContribution";
 import SettlementCalculator from "../components/SettlementCalculator";
+import ActivityTimeline from "../components/ActivityTimeline";
+import ExportPDF from "../components/ExportPDF";
+import BudgetAlerts from "../components/BudgetAlerts";
 import AISuggestions from "../components/AISuggestions";
 import Notifications from "../components/Notifications";
 import ExpenseRequests from "../components/ExpenseRequests";
@@ -156,6 +159,12 @@ export default function GroupDetails() {
         </div>
 
         <SettlementCalculator group={group} />
+
+        <ActivityTimeline group={group} />
+
+        <BudgetAlerts group={group} />
+
+        <ExportPDF group={group} />
 
         <div className="grid md:grid-cols-2 gap-8">
           <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">

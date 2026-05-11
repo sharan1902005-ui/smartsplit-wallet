@@ -78,6 +78,10 @@ export default function ExpenseRequests({ group }) {
             amount: request.amount,
             category: request.category,
             user: currentUser.uid,
+            userName:
+              currentUser.displayName ||
+              currentUser.email ||
+              "User",
             createdAt: new Date().toISOString(),
           })
         : group.transactions || [],
@@ -156,7 +160,10 @@ export default function ExpenseRequests({ group }) {
               <div className="flex justify-between items-center flex-wrap gap-4">
                 <div>
                   <h3 className="text-xl font-bold text-slate-900">
-                    {request.category} • {request.title}
+                    <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm mr-2">
+                      {request.category}
+                    </span>
+                    {request.title}
                   </h3>
 
                   <p className="text-slate-500">

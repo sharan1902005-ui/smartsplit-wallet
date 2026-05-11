@@ -10,20 +10,42 @@ import {
 export default function ExpenseChart({ group }) {
   const transactions = group.transactions || [];
 
-  const deposits = transactions
-    .filter((t) => t.type === "deposit")
-    .reduce((sum, t) => sum + t.amount, 0);
+  const expenses = transactions.filter(
+    (tx) => tx.type === "expense"
+  );
 
-  const expenses = transactions
-    .filter((t) => t.type === "expense")
-    .reduce((sum, t) => sum + t.amount, 0);
+  const categoryTotals = {};
 
-  const data = [
-    { name: "Deposits", value: deposits },
-    { name: "Expenses", value: expenses }
+  expenses.forEach((expense) => {
+    const category = expense.category || "Misc";
+
+    categoryTotals[category] =
+      (categoryTotals[category] || 0) + expense.amount;
+  });
+
+  const data = Object.entries(categoryTotals).map(
+    ([name, value]) => ({
+      name,
+      value,
+    })
+  );
+
+  const COLORS = [
+    "#ef4444",
+    "#f59e0b",
+    "#10b981",
+    "#3b82f6",
+    "#8b5cf6",
+    "#ec4899",
   ];
 
-  const COLORS = ["#dc2626", "#f59e0b"];
+  if (data.length === 0) {
+    return (
+      <div className="h-[350px] flex items-center justify-center text-slate-500">
+        No expense analytics yet.
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-[380px]">
@@ -31,15 +53,15 @@ export default function ExpenseChart({ group }) {
         <PieChart>
           <Pie
             data={data}
-            cx="50%"
-            cy="50%"
             outerRadius={120}
-            fill="#8884d8"
             dataKey="value"
             label
           >
             {data.map((entry, index) => (
-              <Cell key={index} fill={COLORS[index % COLORS.length]} />
+              <Cell
+                key={index}
+                fill={COLORS[index % COLORS.length]}
+              />
             ))}
           </Pie>
 

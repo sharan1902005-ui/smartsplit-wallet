@@ -33,7 +33,19 @@ export default function CreateGroup() {
         adminUid: auth.currentUser.uid,
         adminUpi: adminUpi,
 
-        members: [auth.currentUser.uid],
+        members: [
+          {
+            uid: auth.currentUser.uid,
+            name:
+              auth.currentUser.displayName ||
+              "User",
+            email:
+              auth.currentUser.email || "",
+            photo:
+              auth.currentUser.photoURL || "",
+            role: "admin",
+          },
+        ],
         walletBalance: 0,
         transactions: [],
         expenseRequests: [],

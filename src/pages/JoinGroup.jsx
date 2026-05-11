@@ -34,7 +34,17 @@ export default function JoinGroup() {
       const groupDoc = snapshot.docs[0];
 
       await updateDoc(doc(db, "groups", groupDoc.id), {
-        members: arrayUnion(auth.currentUser.uid),
+        members: arrayUnion({
+          uid: auth.currentUser.uid,
+          name:
+            auth.currentUser.displayName ||
+            "User",
+          email:
+            auth.currentUser.email || "",
+          photo:
+            auth.currentUser.photoURL || "",
+          role: "member",
+        }),
       });
 
       alert("Joined group successfully 🚀");
