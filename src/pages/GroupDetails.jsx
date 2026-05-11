@@ -17,9 +17,12 @@ import {
 import ExpenseInsights from "../components/ExpenseInsights";
 import ExpenseChart from "../components/ExpenseChart";
 import MemberContribution from "../components/MemberContribution";
+import SettlementCalculator from "../components/SettlementCalculator";
 import AISuggestions from "../components/AISuggestions";
 import Notifications from "../components/Notifications";
+import ExpenseRequests from "../components/ExpenseRequests";
 import RazorpayPayment from "../components/RazorpayPayment";
+import RealUPIPayment from "../components/RealUPIPayment";
 import GroupChat from "../components/GroupChat";
 import PaymentSimulator from "../components/PaymentSimulator";
 
@@ -152,6 +155,8 @@ export default function GroupDetails() {
           </div>
         </div>
 
+        <SettlementCalculator group={group} />
+
         <div className="grid md:grid-cols-2 gap-8">
           <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
             <AISuggestions group={group} />
@@ -162,18 +167,14 @@ export default function GroupDetails() {
           </div>
         </div>
 
+        <ExpenseRequests group={group} />
+
         <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
           <GroupChat group={group} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
-            <PaymentSimulator group={group} />
-          </div>
-
-          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
-            <RazorpayPayment group={group} />
-          </div>
+          <RealUPIPayment group={group} />
         </div>
       </div>
     </div>
