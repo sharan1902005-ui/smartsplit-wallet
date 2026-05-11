@@ -2,45 +2,14 @@ import {
   Wallet,
   Receipt,
   CheckCircle,
-  XCircle
+  XCircle,
+  Image as ImageIcon
 } from "lucide-react";
 
 export default function ActivityTimeline({ group }) {
-  const transactions = group.transactions || [];
-  const requests = group.expenseRequests || [];
+  const activities = group.activityTimeline || [];
 
-  const activities = [];
-
-  transactions.forEach((tx) => {
-    if (tx.type === "deposit") {
-      activities.push({
-        type: "deposit",
-        title: `${tx.userName || "User"} added ₹${tx.amount}`,
-        subtitle: `via ${tx.source || "Wallet"}`,
-        createdAt: tx.createdAt,
-      });
-    }
-
-    if (tx.type === "expense") {
-      activities.push({
-        type: "expense",
-        title: `${tx.userName || "User"} spent ₹${tx.amount}`,
-        subtitle: tx.category || "Expense",
-        createdAt: tx.createdAt,
-      });
-    }
-  });
-
-  requests.forEach((req) => {
-    activities.push({
-      type: req.status,
-      title: `${req.requestedByName || "User"} requested ₹${req.amount}`,
-      subtitle: req.title,
-      createdAt: req.createdAt,
-    });
-  });
-
-  activities.sort(
+  const sortedActivities = [...activities].sort(
     (a, b) =>
       new Date(b.createdAt) - new Date(a.createdAt)
   );
@@ -49,14 +18,24 @@ export default function ActivityTimeline({ group }) {
     switch (type) {
       case "deposit":
         return <Wallet className="text-green-500" />;
-      case "expense":
-        return <Receipt className="text-red-500" />;
+
+      case "request":
+        return <Receipt className="text-orange-500" />;
+
       case "approved":
         return <CheckCircle className="text-green-500" />;
+
       case "rejected":
         return <XCircle className="text-red-500" />;
+
+      case "paid":
+        return <Wallet className="text-blue-500" />;
+
+      case "proof":
+        return <ImageIcon className="text-purple-500" />;
+
       default:
-        return <Receipt className="text-orange-500" />;
+        return <Receipt className="text-slate-500" />;
     }
   };
 
@@ -66,13 +45,13 @@ export default function ActivityTimeline({ group }) {
         Activity Timeline
       </h2>
 
-      {activities.length === 0 ? (
+      {sortedActivities.length === 0 ? (
         <p className="text-slate-500">
           No activity yet.
         </p>
       ) : (
         <div className="space-y-4 max-h-[500px] overflow-y-auto">
-          {activities.map((activity, index) => (
+          {sortedActivities.map((activity, index) => (
             <div
               key={index}
               className="flex gap-4 items-start bg-[#fff8f2] border border-red-100 rounded-2xl p-5"
@@ -83,12 +62,8 @@ export default function ActivityTimeline({ group }) {
 
               <div>
                 <h3 className="font-bold text-slate-900">
-                  {activity.title}
+                  {activity.text}
                 </h3>
-
-                <p className="text-slate-500 text-sm">
-                  {activity.subtitle}
-                </p>
 
                 <p className="text-xs text-slate-400 mt-2">
                   {new Date(

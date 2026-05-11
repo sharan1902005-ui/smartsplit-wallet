@@ -21,11 +21,14 @@ import SettlementCalculator from "../components/SettlementCalculator";
 import ActivityTimeline from "../components/ActivityTimeline";
 import ExportPDF from "../components/ExportPDF";
 import BudgetAlerts from "../components/BudgetAlerts";
+import SplitExpense from "../components/SplitExpense";
+import ExpenseApproval from "../components/ExpenseApproval";
 import AISuggestions from "../components/AISuggestions";
 import Notifications from "../components/Notifications";
 import ExpenseRequests from "../components/ExpenseRequests";
 import RazorpayPayment from "../components/RazorpayPayment";
 import RealUPIPayment from "../components/RealUPIPayment";
+import ExpenseRequestForm from "../components/ExpenseRequestForm";
 import GroupChat from "../components/GroupChat";
 import PaymentSimulator from "../components/PaymentSimulator";
 
@@ -164,6 +167,10 @@ export default function GroupDetails() {
 
         <BudgetAlerts group={group} />
 
+        <SplitExpense group={group} />
+
+        <ExpenseApproval group={group} />
+
         <ExportPDF group={group} />
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -184,6 +191,7 @@ export default function GroupDetails() {
 
         <div className="grid md:grid-cols-2 gap-8">
           <RealUPIPayment group={group} />
+          <ExpenseRequestForm group={group} />
         </div>
       </div>
     </div>

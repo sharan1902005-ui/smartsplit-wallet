@@ -49,6 +49,7 @@ export default function CreateGroup() {
         walletBalance: 0,
         transactions: [],
         expenseRequests: [],
+        activityTimeline: [],
         createdAt: serverTimestamp(),
       });
 
