@@ -5,148 +5,95 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import { db, auth } from "../firebase/config";
+import toast from "react-hot-toast";
 import {
   Wallet,
   Smartphone,
-  Loader2,
+  CheckCircle,
 } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 
 export default function RealUPIPayment({ group }) {
   const [amount, setAmount] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [utr, setUtr] = useState("");
+  const [paymentStarted, setPaymentStarted] =
+    useState(false);
 
-  const startPayment = async () => {
+  const upiUrl =
+    amount && group.adminUpi
+      ? `upi://pay?pa=${group.adminUpi}&pn=SmartSplit Wallet&am=${amount}&cu=INR`
+      : "";
+
+  const payViaUPI = () => {
     if (!amount || Number(amount) <= 0) {
       alert("Enter valid amount");
       return;
     }
 
-    try {
-      setLoading(true);
+    if (!group.adminUpi) {
+      alert("Admin UPI not configured");
+      return;
+    }
 
-      // Create Razorpay order
-      const res = await fetch("/api/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: Number(amount),
+    window.location.href = upiUrl;
+    setPaymentStarted(true);
+  };
+
+  const confirmPayment = async () => {
+    if (!paymentStarted) {
+      alert("Start payment first");
+      return;
+    }
+
+    if (!utr.trim()) {
+      alert("Enter UTR / transaction ID");
+      return;
+    }
+
+    if (utr.trim().length < 8) {
+      alert("Enter valid UTR");
+      return;
+    }
+
+    try {
+      const depositAmount = Number(amount);
+
+      await updateDoc(doc(db, "groups", group.id), {
+        depositRequests: arrayUnion({
+          amount: depositAmount,
+          utr: utr,
+          user: auth.currentUser.uid,
+          userName:
+            auth.currentUser.displayName ||
+            auth.currentUser.email ||
+            "User",
+          status: "pending",
+          createdAt: new Date().toISOString(),
+        }),
+
+        activityTimeline: arrayUnion({
+          type: "deposit_request",
+          text: `${
+            auth.currentUser.displayName ||
+            auth.currentUser.email
+          } requested deposit approval for ₹${depositAmount}`,
+          createdAt: new Date().toISOString(),
         }),
       });
 
-      const order = await res.json();
+      toast.success("Deposit request sent to admin for approval");
 
-      if (!order?.id) {
-        throw new Error("Failed to create payment order");
-      }
-
-      const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: order.amount,
-        currency: order.currency,
-        name: "SmartSplit Wallet",
-        description: `Top up ${group.name}`,
-        order_id: order.id,
-
-        prefill: {
-          name:
-            auth.currentUser?.displayName ||
-            "SmartSplit User",
-          email:
-            auth.currentUser?.email || "",
-        },
-
-        theme: {
-          color: "#ef4444",
-        },
-
-        handler: async function (response) {
-          try {
-            const depositAmount =
-              Number(amount);
-
-            await updateDoc(
-              doc(db, "groups", group.id),
-              {
-                walletBalance:
-                  (group.walletBalance || 0) +
-                  depositAmount,
-
-                totalIncome:
-                  (group.totalIncome || 0) +
-                  depositAmount,
-
-                transactions: arrayUnion({
-                  type: "deposit",
-                  amount: depositAmount,
-                  user:
-                    auth.currentUser.uid,
-                  userName:
-                    auth.currentUser
-                      .displayName ||
-                    auth.currentUser
-                      .email ||
-                    "User",
-                  paymentId:
-                    response.razorpay_payment_id,
-                  orderId:
-                    response.razorpay_order_id,
-                  source: "Razorpay",
-                  createdAt:
-                    new Date().toISOString(),
-                }),
-
-                activityTimeline:
-                  arrayUnion({
-                    type: "deposit",
-                    text: `${
-                      auth.currentUser
-                        .displayName ||
-                      auth.currentUser
-                        .email
-                    } added ₹${depositAmount} to shared wallet`,
-                    createdAt:
-                      new Date().toISOString(),
-                  }),
-              }
-            );
-
-            alert(
-              "Payment successful! Wallet updated."
-            );
-
-            setAmount("");
-          } catch (err) {
-            alert(
-              "Payment succeeded but wallet update failed."
-            );
-            console.error(err);
-          }
-        },
-
-        modal: {
-          ondismiss: function () {
-            setLoading(false);
-          },
-        },
-      };
-
-      const razor = new window.Razorpay(
-        options
-      );
-      razor.open();
-
-      setLoading(false);
+      setAmount("");
+      setUtr("");
+      setPaymentStarted(false);
     } catch (err) {
       console.error(err);
-      alert(err.message);
-      setLoading(false);
+      toast.error("Request failed");
     }
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
+    <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
       <div className="flex items-center gap-4 mb-6">
         <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white p-4 rounded-2xl">
           <Wallet size={24} />
@@ -158,19 +105,25 @@ export default function RealUPIPayment({ group }) {
           </h2>
 
           <p className="text-slate-500 mt-1">
-            Pay using UPI, GPay, PhonePe,
-            cards
+            Pay directly to admin wallet
           </p>
         </div>
       </div>
 
-      <div className="bg-[#fff8f2] dark:bg-slate-800 rounded-2xl p-6 mb-6">
+      <div className="bg-[#fff8f2] rounded-2xl p-6 mb-6">
         <p className="text-slate-500 text-sm">
-          Current Shared Wallet
+          Shared Wallet Balance
         </p>
 
         <p className="text-4xl font-black text-red-500 mt-2">
           ₹{group.walletBalance || 0}
+        </p>
+
+        <p className="text-sm text-slate-500 mt-4">
+          Admin UPI:
+          <span className="font-bold ml-2">
+            {group.adminUpi}
+          </span>
         </p>
       </div>
 
@@ -181,29 +134,47 @@ export default function RealUPIPayment({ group }) {
         onChange={(e) =>
           setAmount(e.target.value)
         }
-        className="w-full p-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-white dark:bg-slate-800 mb-6"
+        className="w-full p-4 rounded-2xl border border-red-100 bg-white mb-5"
       />
 
+      <input
+        type="text"
+        placeholder="Enter UTR / Transaction ID"
+        value={utr}
+        onChange={(e) => setUtr(e.target.value)}
+        className="w-full p-4 rounded-2xl border border-red-100 bg-white mb-5"
+      />
+
+      {amount && (
+        <div className="bg-[#fffdf8] border border-orange-100 rounded-2xl p-6 mb-5 flex flex-col items-center">
+          <p className="font-semibold mb-4">
+            Scan to Pay
+          </p>
+
+          <QRCodeCanvas
+            value={upiUrl}
+            size={200}
+          />
+        </div>
+      )}
+
       <button
-        onClick={startPayment}
-        disabled={loading}
-        className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white p-4 rounded-2xl font-bold flex items-center justify-center gap-3"
+        onClick={payViaUPI}
+        className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white p-4 rounded-2xl font-bold flex items-center justify-center gap-3 mb-4"
       >
-        {loading ? (
-          <>
-            <Loader2
-              size={20}
-              className="animate-spin"
-            />
-            Processing...
-          </>
-        ) : (
-          <>
-            <Smartphone size={20} />
-            Pay with Razorpay
-          </>
-        )}
+        <Smartphone size={20} />
+        Pay via GPay / PhonePe
       </button>
+
+      {paymentStarted && (
+        <button
+          onClick={confirmPayment}
+          className="w-full bg-green-600 text-white p-4 rounded-2xl font-bold flex items-center justify-center gap-3"
+        >
+          <CheckCircle size={20} />
+          I Completed Payment
+        </button>
+      )}
     </div>
   );
 }

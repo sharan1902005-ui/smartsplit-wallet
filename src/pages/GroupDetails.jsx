@@ -32,6 +32,7 @@ import Notifications from "../components/Notifications";
 import ExpenseRequests from "../components/ExpenseRequests";
 import RazorpayPayment from "../components/RazorpayPayment";
 import RealUPIPayment from "../components/RealUPIPayment";
+import DepositApproval from "../components/DepositApproval";
 import ExpenseRequestForm from "../components/ExpenseRequestForm";
 import GroupChat from "../components/GroupChat";
 import PaymentSimulator from "../components/PaymentSimulator";
@@ -205,7 +206,7 @@ export default function GroupDetails() {
 
         <div className="grid md:grid-cols-2 gap-8">
           <RealUPIPayment group={group} />
-          <ExpenseRequestForm group={group} />
+          <DepositApproval group={group} />
         </div>
       </div>
     </div>

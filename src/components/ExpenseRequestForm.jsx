@@ -5,6 +5,7 @@ import {
   arrayUnion
 } from "firebase/firestore";
 import { db, auth } from "../firebase/config";
+import toast from "react-hot-toast";
 
 export default function ExpenseRequestForm({ group }) {
   const [title, setTitle] = useState("");
@@ -46,7 +47,7 @@ export default function ExpenseRequestForm({ group }) {
     setAmount("");
     setCategory("Food");
 
-    alert("Expense request submitted");
+    toast.success("Expense request submitted");
   };
 
   return (

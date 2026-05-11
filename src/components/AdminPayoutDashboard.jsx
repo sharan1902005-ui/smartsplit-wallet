@@ -3,6 +3,7 @@ import {
   updateDoc
 } from "firebase/firestore";
 import { db, auth } from "../firebase/config";
+import toast from "react-hot-toast";
 import {
   Wallet,
   CheckCircle
@@ -76,7 +77,7 @@ export default function AdminPayoutDashboard({ group }) {
       ],
     });
 
-    alert("Vendor paid successfully");
+    toast.success("Vendor paid successfully");
   };
 
   if (!isAdmin) return null;

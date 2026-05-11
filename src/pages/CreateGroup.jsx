@@ -49,6 +49,7 @@ export default function CreateGroup() {
         walletBalance: 0,
         transactions: [],
         expenseRequests: [],
+        depositRequests: [],
         activityTimeline: [],
         chatMessages: [],
         createdAt: serverTimestamp(),
