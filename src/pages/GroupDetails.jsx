@@ -13,6 +13,7 @@ import ExpenseChart from "../components/ExpenseChart";
 import MemberContribution from "../components/MemberContribution";
 import AISuggestions from "../components/AISuggestions";
 import Notifications from "../components/Notifications";
+import RazorpayPayment from "../components/RazorpayPayment";
 import GroupChat from "../components/GroupChat";
 import PaymentSimulator from "../components/PaymentSimulator";
 
@@ -101,6 +102,7 @@ export default function GroupDetails() {
       <Notifications group={group} />
       <GroupChat group={group} />
       <PaymentSimulator group={group} />
+      <RazorpayPayment group={group} />
     </div>
   );
 }
