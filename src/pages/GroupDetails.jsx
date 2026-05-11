@@ -18,11 +18,15 @@ import ExpenseInsights from "../components/ExpenseInsights";
 import ExpenseChart from "../components/ExpenseChart";
 import MemberContribution from "../components/MemberContribution";
 import SettlementCalculator from "../components/SettlementCalculator";
+import MemberProfiles from "../components/MemberProfiles";
+import InviteByEmail from "../components/InviteByEmail";
 import ActivityTimeline from "../components/ActivityTimeline";
 import ExportPDF from "../components/ExportPDF";
+import ExportReport from "../components/ExportReport";
 import BudgetAlerts from "../components/BudgetAlerts";
 import SplitExpense from "../components/SplitExpense";
 import ExpenseApproval from "../components/ExpenseApproval";
+import AdminPayoutDashboard from "../components/AdminPayoutDashboard";
 import AISuggestions from "../components/AISuggestions";
 import Notifications from "../components/Notifications";
 import ExpenseRequests from "../components/ExpenseRequests";
@@ -161,7 +165,15 @@ export default function GroupDetails() {
           </div>
         </div>
 
+        <MemberProfiles group={group} />
+
+        <InviteByEmail group={group} />
+
+        <BudgetAlerts group={group} />
+
         <SettlementCalculator group={group} />
+
+        <ExportReport group={group} />
 
         <ActivityTimeline group={group} />
 
@@ -170,6 +182,8 @@ export default function GroupDetails() {
         <SplitExpense group={group} />
 
         <ExpenseApproval group={group} />
+
+        <AdminPayoutDashboard group={group} />
 
         <ExportPDF group={group} />
 

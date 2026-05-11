@@ -2,80 +2,98 @@ import { AlertTriangle, CheckCircle } from "lucide-react";
 
 export default function BudgetAlerts({ group }) {
   const transactions = group.transactions || [];
-
-  const deposits = transactions.filter(
-    (tx) => tx.type === "deposit"
-  );
+  const requests = group.expenseRequests || [];
 
   const expenses = transactions.filter(
-    (tx) => tx.type === "expense"
+    (t) => t.type === "expense"
+  );
+
+  const deposits = transactions.filter(
+    (t) => t.type === "deposit"
   );
 
   const totalDeposits = deposits.reduce(
-    (sum, tx) => sum + tx.amount,
+    (sum, t) => sum + t.amount,
     0
   );
 
   const totalExpenses = expenses.reduce(
-    (sum, tx) => sum + tx.amount,
+    (sum, t) => sum + t.amount,
     0
   );
 
   const foodExpenses = expenses
-    .filter((tx) => tx.category === "Food")
-    .reduce((sum, tx) => sum + tx.amount, 0);
+    .filter((e) => e.category === "Food")
+    .reduce((sum, e) => sum + e.amount, 0);
+
+  const pendingRequests = requests.filter(
+    (r) => r.status === "pending"
+  ).length;
 
   const alerts = [];
 
-  if (group.walletBalance < 500) {
+  if (group.walletBalance < 1000) {
     alerts.push({
       type: "warning",
-      title: "Low wallet balance",
-      desc: "Shared wallet is below ₹500",
+      title: "Low Wallet Balance",
+      message:
+        "Shared wallet balance is below ₹1000",
     });
   }
 
   if (
     totalDeposits > 0 &&
-    totalExpenses >= totalDeposits * 0.8
+    totalExpenses > totalDeposits * 0.8
   ) {
     alerts.push({
       type: "warning",
-      title: "High spending",
-      desc: "80% of wallet contributions have been used",
+      title: "High Spending",
+      message:
+        "More than 80% of contributions have been spent",
     });
   }
 
   if (
     totalExpenses > 0 &&
-    foodExpenses >= totalExpenses * 0.4
+    foodExpenses > totalExpenses * 0.4
   ) {
     alerts.push({
       type: "warning",
-      title: "Food spending high",
-      desc: "Food takes a major share of expenses",
+      title: "Food Spending High",
+      message:
+        "Food expenses exceed 40% of total spend",
+    });
+  }
+
+  if (pendingRequests >= 3) {
+    alerts.push({
+      type: "warning",
+      title: "Pending Requests",
+      message:
+        "Several requests are waiting for approval",
     });
   }
 
   if (alerts.length === 0) {
     alerts.push({
       type: "healthy",
-      title: "Budget looks healthy",
-      desc: "Spending is under control",
+      title: "Budget Healthy",
+      message:
+        "Spending patterns look under control",
     });
   }
 
   return (
     <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
       <h2 className="text-3xl font-bold text-red-600 mb-6">
-        Budget Alerts
+        Smart Budget Alerts
       </h2>
 
       <div className="space-y-4">
         {alerts.map((alert, index) => (
           <div
             key={index}
-            className={`rounded-2xl p-5 border flex gap-4 items-start ${
+            className={`rounded-2xl p-5 flex gap-4 items-start border ${
               alert.type === "warning"
                 ? "bg-yellow-50 border-yellow-200"
                 : "bg-green-50 border-green-200"
@@ -83,9 +101,9 @@ export default function BudgetAlerts({ group }) {
           >
             <div>
               {alert.type === "warning" ? (
-                <AlertTriangle className="text-yellow-500" />
+                <AlertTriangle className="text-yellow-600" />
               ) : (
-                <CheckCircle className="text-green-500" />
+                <CheckCircle className="text-green-600" />
               )}
             </div>
 
@@ -95,7 +113,7 @@ export default function BudgetAlerts({ group }) {
               </h3>
 
               <p className="text-slate-500 text-sm mt-1">
-                {alert.desc}
+                {alert.message}
               </p>
             </div>
           </div>

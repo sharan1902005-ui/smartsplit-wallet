@@ -5,10 +5,12 @@ import Dashboard from "./pages/Dashboard";
 import CreateGroup from "./pages/CreateGroup";
 import GroupDetails from "./pages/GroupDetails";
 import JoinGroup from "./pages/JoinGroup";
+import ThemeToggle from "./components/ThemeToggle";
 
 function App() {
   return (
     <BrowserRouter>
+      <ThemeToggle />
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />

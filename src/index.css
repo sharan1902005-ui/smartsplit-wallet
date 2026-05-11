@@ -1,9 +1,43 @@
 @import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
 
 :root {
   font-family: Inter, system-ui, sans-serif;
   color: #1e293b;
   background: #fff8e7;
+}
+
+.dark body {
+  background: #0f172a;
+  color: #f1f5f9;
+}
+
+.dark .bg-white {
+  background: #1e293b !important;
+}
+
+.dark .bg-\[\#fff8f2\] {
+  background: #1e293b !important;
+}
+
+.dark .text-slate-900 {
+  color: #f1f5f9 !important;
+}
+
+.dark .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.dark .border-red-100 {
+  border-color: #334155 !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background: #1e293b !important;
+  color: #f1f5f9 !important;
+  border-color: #334155 !important;
 }
 
 body {

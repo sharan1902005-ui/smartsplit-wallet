@@ -5,7 +5,8 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
 } from "firebase/auth";
-import { auth } from "../firebase/config";
+import { auth, db } from "../firebase/config";
+import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { Wallet, ShieldCheck, Sparkles } from "lucide-react";
 
@@ -22,7 +23,14 @@ export default function Login() {
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        name: user.displayName || "User",
+        email: user.email || "",
+        photo: user.photoURL || "",
+      }, { merge: true });
       navigate("/dashboard");
     } catch (err) {
       alert(err.message);
@@ -39,13 +47,19 @@ export default function Login() {
 
     try {
       setLoading(true);
-
+      let result;
       if (isSignup) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        result = await createUserWithEmailAndPassword(auth, email, password);
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        result = await signInWithEmailAndPassword(auth, email, password);
       }
-
+      const user = result.user;
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        name: user.displayName || email.split("@")[0],
+        email: user.email || "",
+        photo: user.photoURL || "",
+      }, { merge: true });
       navigate("/dashboard");
     } catch (err) {
       alert(err.message);

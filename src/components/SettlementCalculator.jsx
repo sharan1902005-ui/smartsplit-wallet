@@ -1,79 +1,110 @@
 export default function SettlementCalculator({ group }) {
+  const members = group.members || [];
   const transactions = group.transactions || [];
 
   const deposits = transactions.filter(
-    (tx) => tx.type === "deposit"
+    (t) => t.type === "deposit"
   );
 
-  const expenses = transactions.filter(
-    (tx) => tx.type === "expense"
-  );
+  const contributions = {};
 
-  const membersMap = {};
+  members.forEach((member) => {
+    const uid =
+      typeof member === "string"
+        ? member
+        : member.uid;
 
-  deposits.forEach((tx) => {
-    const name = tx.userName || "User";
+    const name =
+      typeof member === "string"
+        ? "Member"
+        : member.name ||
+          member.email ||
+          "Member";
 
-    if (!membersMap[tx.user]) {
-      membersMap[tx.user] = {
-        name,
+    contributions[uid] = {
+      name,
+      paid: 0,
+    };
+  });
+
+  deposits.forEach((txn) => {
+    if (!contributions[txn.user]) {
+      contributions[txn.user] = {
+        name:
+          txn.userName || "Member",
         paid: 0,
       };
     }
 
-    membersMap[tx.user].paid += tx.amount;
+    contributions[txn.user].paid += txn.amount;
   });
 
-  const totalExpenses = expenses.reduce(
-    (sum, tx) => sum + tx.amount,
+  const totalPaid = deposits.reduce(
+    (sum, t) => sum + t.amount,
     0
   );
 
-  const members = Object.values(membersMap);
+  const memberCount = Object.keys(
+    contributions
+  ).length;
 
-  if (members.length === 0) {
-    return (
-      <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
-        <h2 className="text-2xl font-bold text-red-600 mb-4">
-          Settlement Calculator
-        </h2>
-        <p className="text-slate-500">
-          No contribution data yet.
-        </p>
-      </div>
-    );
+  if (memberCount === 0) {
+    return null;
   }
 
-  const sharePerPerson = totalExpenses / members.length;
+  const fairShare = totalPaid / memberCount;
 
-  const balances = members.map((member) => ({
-    ...member,
-    balance: member.paid - sharePerPerson,
-  }));
+  const creditors = [];
+  const debtors = [];
 
-  const creditors = balances.filter((m) => m.balance > 0);
-  const debtors = balances.filter((m) => m.balance < 0);
+  Object.entries(contributions).forEach(
+    ([uid, member]) => {
+      const diff =
+        member.paid - fairShare;
+
+      if (diff > 0) {
+        creditors.push({
+          name: member.name,
+          amount: diff,
+        });
+      } else if (diff < 0) {
+        debtors.push({
+          name: member.name,
+          amount: Math.abs(diff),
+        });
+      }
+    }
+  );
 
   const settlements = [];
 
-  debtors.forEach((debtor) => {
-    let debt = Math.abs(debtor.balance);
+  let i = 0;
+  let j = 0;
 
-    creditors.forEach((creditor) => {
-      if (debt <= 0 || creditor.balance <= 0) return;
+  while (
+    i < debtors.length &&
+    j < creditors.length
+  ) {
+    const debtor = debtors[i];
+    const creditor = creditors[j];
 
-      const payAmount = Math.min(debt, creditor.balance);
+    const settleAmount = Math.min(
+      debtor.amount,
+      creditor.amount
+    );
 
-      settlements.push({
-        from: debtor.name,
-        to: creditor.name,
-        amount: payAmount,
-      });
-
-      debt -= payAmount;
-      creditor.balance -= payAmount;
+    settlements.push({
+      from: debtor.name,
+      to: creditor.name,
+      amount: settleAmount,
     });
-  });
+
+    debtor.amount -= settleAmount;
+    creditor.amount -= settleAmount;
+
+    if (debtor.amount <= 0) i++;
+    if (creditor.amount <= 0) j++;
+  }
 
   return (
     <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
@@ -81,52 +112,51 @@ export default function SettlementCalculator({ group }) {
         Settlement Calculator
       </h2>
 
-      <div className="bg-[#fff8f2] rounded-2xl border border-orange-100 p-5 mb-6">
-        <p className="text-slate-500">
-          Total Expenses
-        </p>
-        <p className="text-3xl font-black text-red-600">
-          ₹{totalExpenses}
+      <div className="bg-[#fff8f2] border border-orange-100 rounded-2xl p-5 mb-6">
+        <p className="text-slate-600">
+          Total contributed:
+          <span className="font-bold text-red-600 ml-2">
+            ₹{totalPaid}
+          </span>
         </p>
 
-        <p className="text-sm text-slate-500 mt-2">
-          Equal share: ₹{sharePerPerson.toFixed(0)} per person
+        <p className="text-slate-600 mt-2">
+          Fair share per member:
+          <span className="font-bold text-orange-600 ml-2">
+            ₹{fairShare.toFixed(0)}
+          </span>
         </p>
       </div>
 
       {settlements.length === 0 ? (
         <p className="text-slate-500">
-          Everyone is settled 🎉
+          Everyone is settled ✅
         </p>
       ) : (
         <div className="space-y-4">
-          {settlements.map((settlement, index) => (
-            <div
-              key={index}
-              className="bg-green-50 border border-green-100 rounded-2xl p-5 flex justify-between items-center"
-            >
-              <div>
+          {settlements.map(
+            (settlement, index) => (
+              <div
+                key={index}
+                className="bg-[#fff8f2] border border-red-100 rounded-2xl p-5"
+              >
                 <p className="font-bold text-slate-900">
                   {settlement.from}
-                </p>
-                <p className="text-slate-500 text-sm">
-                  owes
-                </p>
-              </div>
-
-              <div className="text-center">
-                <p className="text-xl font-black text-green-600">
-                  ₹{settlement.amount.toFixed(0)}
-                </p>
-              </div>
-
-              <div>
-                <p className="font-bold text-slate-900">
+                  <span className="text-slate-500 mx-2">
+                    owes
+                  </span>
                   {settlement.to}
                 </p>
+
+                <p className="text-red-600 font-black text-xl mt-2">
+                  ₹
+                  {settlement.amount.toFixed(
+                    0
+                  )}
+                </p>
               </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       )}
     </div>

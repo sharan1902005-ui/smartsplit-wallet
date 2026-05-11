@@ -50,6 +50,7 @@ export default function CreateGroup() {
         transactions: [],
         expenseRequests: [],
         activityTimeline: [],
+        chatMessages: [],
         createdAt: serverTimestamp(),
       });
 
