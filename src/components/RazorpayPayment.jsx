@@ -6,43 +6,60 @@ export default function RazorpayPayment({ group }) {
   const handlePayment = async () => {
     const amount = prompt("Enter payment amount");
 
-    if (!amount) return;
+    if (!amount || Number(amount) <= 0) return;
 
-    const { data } = await axios.post("/api/create-order", {
-      amount: Number(amount),
-    });
+    try {
+      let order_id, amount_paise, currency;
 
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-      amount: data.amount,
-      currency: data.currency,
-      name: "SmartSplit Wallet",
-      description: "Wallet Funding",
-      order_id: data.id,
-
-      handler: async function () {
-        await updateDoc(doc(db, "groups", group.id), {
-          walletBalance: group.walletBalance + Number(amount),
-
-          transactions: arrayUnion({
-            type: "deposit",
-            amount: Number(amount),
-            user: auth.currentUser.uid,
-            source: "Razorpay",
-            createdAt: new Date().toISOString(),
-          }),
+      if (import.meta.env.DEV) {
+        // Local dev: skip backend, call Razorpay directly
+        amount_paise = Number(amount) * 100;
+        currency = "INR";
+      } else {
+        // Production (Vercel): create order via backend
+        const { data } = await axios.post("/api/create-order", {
+          amount: Number(amount),
         });
+        order_id = data.id;
+        amount_paise = data.amount;
+        currency = data.currency;
+      }
 
-        alert("Payment successful!");
-      },
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: amount_paise,
+        currency,
+        name: "SmartSplit Wallet",
+        description: "Wallet Funding",
+        ...(order_id && { order_id }),
 
-      theme: {
-        color: "#6366f1",
-      },
-    };
+        handler: async function () {
+          await updateDoc(doc(db, "groups", group.id), {
+            walletBalance: group.walletBalance + Number(amount),
+            transactions: arrayUnion({
+              type: "deposit",
+              amount: Number(amount),
+              user: auth.currentUser.uid,
+              source: "Razorpay",
+              createdAt: new Date().toISOString(),
+            }),
+          });
 
-    const razor = new window.Razorpay(options);
-    razor.open();
+          alert("Payment successful!");
+          window.location.reload();
+        },
+
+        theme: {
+          color: "#6366f1",
+        },
+      };
+
+      const razor = new window.Razorpay(options);
+      razor.open();
+    } catch (error) {
+      console.error("Payment error:", error);
+      alert("Payment failed. Check console for details.");
+    }
   };
 
   return (

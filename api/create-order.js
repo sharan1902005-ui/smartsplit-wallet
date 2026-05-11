@@ -1,10 +1,8 @@
-const Razorpay = require("razorpay");
+import Razorpay from "razorpay";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({
-      message: "Method not allowed",
-    });
+    return res.status(405).json({ message: "Method not allowed" });
   }
 
   try {
@@ -13,18 +11,14 @@ export default async function handler(req, res) {
       key_secret: process.env.RAZORPAY_KEY_SECRET,
     });
 
-    const options = {
+    const order = await razorpay.orders.create({
       amount: req.body.amount * 100,
       currency: "INR",
       receipt: "smartsplit_receipt",
-    };
-
-    const order = await razorpay.orders.create(options);
+    });
 
     res.status(200).json(order);
   } catch (error) {
-    res.status(500).json({
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 }

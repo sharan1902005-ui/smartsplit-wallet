@@ -7,6 +7,12 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../firebase/config";
 import { useParams } from "react-router-dom";
+import {
+  Wallet,
+  Users,
+  ShieldCheck,
+  Sparkles
+} from "lucide-react";
 
 import ExpenseInsights from "../components/ExpenseInsights";
 import ExpenseChart from "../components/ExpenseChart";
@@ -22,8 +28,6 @@ export default function GroupDetails() {
 
   const [group, setGroup] = useState(null);
   const [amount, setAmount] = useState("");
-  const [expenseTitle, setExpenseTitle] = useState("");
-  const [expenseAmount, setExpenseAmount] = useState("");
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "groups", id), (snap) => {
@@ -56,53 +60,122 @@ export default function GroupDetails() {
 
   if (!group) {
     return (
-      <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
-        Loading...
+      <div className="min-h-screen flex items-center justify-center bg-[#fff8e7]">
+        <div className="text-2xl font-bold text-red-600 animate-pulse">
+          Loading SmartSplit...
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-8">
-      <h1 className="text-4xl font-bold mb-4">{group.name}</h1>
+    <div className="min-h-screen bg-gradient-to-br from-[#fff8e7] via-[#fff3d4] to-[#ffe5d9] text-slate-900 p-8">
+      {/* Header */}
+      <div className="max-w-7xl mx-auto mb-10">
+        <div className="bg-white/80 backdrop-blur-xl border border-red-100 rounded-3xl shadow-2xl p-8">
+          <div className="flex flex-col md:flex-row justify-between gap-8">
+            <div>
+              <h1 className="text-5xl font-black text-red-600 mb-3">
+                {group.name}
+              </h1>
 
-      <p className="text-slate-400 mb-2">
-        Approval Mode: {group.approvalMode}
-      </p>
+              <p className="text-lg text-slate-600 mb-4">
+                Split expenses, manage wallet, and vibe smarter 💸
+              </p>
 
-      <p className="text-cyan-400 mb-10">
-        Invite Code: {group.inviteCode}
-      </p>
+              <div className="flex flex-wrap gap-4">
+                <div className="bg-yellow-100 px-5 py-3 rounded-2xl flex items-center gap-2 shadow">
+                  <ShieldCheck className="text-red-500" />
+                  <span className="font-semibold">
+                    Approval: {group.approvalMode}
+                  </span>
+                </div>
 
-      <div className="bg-slate-900 rounded-3xl p-8 shadow-xl">
-        <h2 className="text-2xl font-bold mb-4">
-          Wallet Balance: ₹{group.walletBalance}
-        </h2>
+                <div className="bg-red-100 px-5 py-3 rounded-2xl flex items-center gap-2 shadow">
+                  <Users className="text-red-500" />
+                  <span className="font-semibold">
+                    Invite: {group.inviteCode}
+                  </span>
+                </div>
+              </div>
+            </div>
 
-        <input
-          type="number"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Enter amount"
-          className="w-full p-4 rounded-xl bg-slate-800 text-white mb-4"
-        />
+            {/* Wallet Card */}
+            <div className="w-full md:w-[450px] bg-gradient-to-r from-red-500 to-red-600 rounded-3xl p-8 shadow-2xl text-white">
+              <div className="flex items-center gap-3 mb-4">
+                <Wallet size={30} />
+                <h2 className="text-2xl font-bold">Wallet Balance</h2>
+              </div>
 
-        <button
-          onClick={addMoney}
-          className="w-full bg-green-600 p-4 rounded-xl"
-        >
-          Add Money
-        </button>
+              <div className="text-5xl font-black mb-6">
+                ₹{group.walletBalance}
+              </div>
+
+              <input
+                type="number"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                placeholder="Enter amount"
+                className="w-full p-4 rounded-2xl bg-white text-slate-900 mb-4 outline-none shadow"
+              />
+
+              <button
+                onClick={addMoney}
+                className="w-full bg-yellow-400 hover:bg-yellow-300 transition-all text-slate-900 font-bold p-4 rounded-2xl shadow-xl"
+              >
+                Add Money Instantly
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <ExpenseInsights group={group} />
-      <ExpenseChart group={group} />
-      <MemberContribution group={group} />
-      <AISuggestions group={group} />
-      <Notifications group={group} />
-      <GroupChat group={group} />
-      <PaymentSimulator group={group} />
-      <RazorpayPayment group={group} />
+      {/* Main Grid */}
+      <div className="max-w-7xl mx-auto grid gap-8">
+        <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
+          <ExpenseInsights group={group} />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6 min-h-[420px]">
+            <div className="flex items-center gap-2 mb-4">
+              <Sparkles className="text-red-500" />
+              <h2 className="text-2xl font-bold text-red-600">
+                Wallet Analytics
+              </h2>
+            </div>
+            <ExpenseChart group={group} />
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
+            <MemberContribution group={group} />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
+            <AISuggestions group={group} />
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
+            <Notifications group={group} />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
+          <GroupChat group={group} />
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
+            <PaymentSimulator group={group} />
+          </div>
+
+          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
+            <RazorpayPayment group={group} />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

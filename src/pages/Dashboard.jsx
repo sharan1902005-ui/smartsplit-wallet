@@ -1,14 +1,56 @@
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   FaWallet,
   FaUsers,
   FaMoneyBillWave,
-  FaPlus
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { doc, updateDoc, arrayUnion, collection, query, where, onSnapshot } from "firebase/firestore";
+import { db, auth } from "../firebase/config";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [expenseName, setExpenseName] = useState("");
+  const [expenseAmount, setExpenseAmount] = useState("");
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [groups, setGroups] = useState([]);
+  const [expenseCategory, setExpenseCategory] = useState("Food");
+
+  useEffect(() => {
+    if (!auth.currentUser) return;
+    const q = query(collection(db, "groups"), where("memberIds", "array-contains", auth.currentUser.uid));
+    const unsub = onSnapshot(q, (snap) => {
+      setGroups(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    });
+    return unsub;
+  }, []);
+
+  const addQuickExpense = async () => {
+    if (!expenseName || !expenseAmount || !selectedGroup) return;
+
+    const groupRef = doc(db, "groups", selectedGroup.id);
+
+    await updateDoc(groupRef, {
+      walletBalance: selectedGroup.walletBalance - Number(expenseAmount),
+      transactions: arrayUnion({
+        type: "expense",
+        title: expenseName,
+      category: expenseCategory,
+        amount: Number(expenseAmount),
+        user: auth.currentUser.uid,
+        createdAt: new Date().toISOString(),
+      }),
+    });
+
+    setExpenseName("");
+    setExpenseAmount("");
+    setExpenseCategory("Food");
+    setShowExpenseModal(false);
+  };
 
   const members = [
     { name: "Arun", amount: "₹3000" },
@@ -113,9 +155,81 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <button className="fixed bottom-8 right-8 bg-indigo-600 hover:bg-indigo-500 p-5 rounded-full shadow-2xl transition">
-        <FaPlus size={22} />
+      <button
+        onClick={() => setShowExpenseModal(true)}
+        className="fixed bottom-8 right-8 w-16 h-16 rounded-full bg-gradient-to-r from-red-500 to-orange-500 text-white text-4xl shadow-2xl hover:scale-110 transition-all"
+      >
+        +
       </button>
+      {showExpenseModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl relative">
+
+            <button
+              onClick={() => setShowExpenseModal(false)}
+              className="absolute top-4 right-4 text-slate-500"
+            >
+              <X size={24} />
+            </button>
+
+            <h2 className="text-3xl font-bold text-red-600 mb-6">
+              Quick Add Expense
+            </h2>
+
+            <select
+              value={selectedGroup?.id || ""}
+              onChange={(e) => {
+                const chosen = groups.find((g) => g.id === e.target.value);
+                setSelectedGroup(chosen);
+              }}
+              className="w-full p-4 border rounded-2xl mb-4 bg-white"
+            >
+              <option value="">Select Group</option>
+              {groups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.name}
+                </option>
+              ))}
+            </select>
+
+            <input
+              type="text"
+              placeholder="Expense name"
+              value={expenseName}
+              onChange={(e) => setExpenseName(e.target.value)}
+              className="w-full p-4 border rounded-2xl mb-4"
+            />
+
+            <input
+              type="number"
+              placeholder="Amount"
+              value={expenseAmount}
+              onChange={(e) => setExpenseAmount(e.target.value)}
+              className="w-full p-4 border rounded-2xl mb-4"
+            />
+
+            <select
+              value={expenseCategory}
+              onChange={(e) => setExpenseCategory(e.target.value)}
+              className="w-full p-4 border rounded-2xl mb-6"
+            >
+              <option>Food</option>
+              <option>Travel</option>
+              <option>Fuel</option>
+              <option>Shopping</option>
+              <option>Hotel</option>
+              <option>Misc</option>
+            </select>
+
+            <button
+              onClick={addQuickExpense}
+              className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold p-4 rounded-2xl"
+            >
+              Add Expense
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
