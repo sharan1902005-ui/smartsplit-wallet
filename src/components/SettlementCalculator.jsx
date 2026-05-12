@@ -107,12 +107,12 @@ export default function SettlementCalculator({ group }) {
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
+    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
       <h2 className="text-3xl font-bold text-red-600 mb-6">
         Settlement Calculator
       </h2>
 
-      <div className="bg-[#fff8f2] border border-orange-100 rounded-2xl p-5 mb-6">
+      <div className="bg-[#fff8f2] dark:bg-slate-700 border border-orange-100 dark:border-slate-600 rounded-2xl p-5 mb-6">
         <p className="text-slate-600">
           Total contributed:
           <span className="font-bold text-red-600 ml-2">
@@ -129,7 +129,7 @@ export default function SettlementCalculator({ group }) {
       </div>
 
       {settlements.length === 0 ? (
-        <p className="text-slate-500">
+        <p className="text-slate-500 dark:text-slate-400">
           Everyone is settled ✅
         </p>
       ) : (
@@ -138,9 +138,9 @@ export default function SettlementCalculator({ group }) {
             (settlement, index) => (
               <div
                 key={index}
-                className="bg-[#fff8f2] border border-red-100 rounded-2xl p-5"
+                className="bg-[#fff8f2] dark:bg-slate-700 border border-red-100 dark:border-slate-600 rounded-2xl p-5"
               >
-                <p className="font-bold text-slate-900">
+                <p className="font-bold text-slate-900 dark:text-white">
                   {settlement.from}
                   <span className="text-slate-500 mx-2">
                     owes

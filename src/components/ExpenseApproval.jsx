@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, auth, storage } from "../firebase/config";
 import { CheckCircle, XCircle, Wallet } from "lucide-react";
@@ -9,6 +9,50 @@ export default function ExpenseApproval({ group }) {
   const currentUser = auth.currentUser;
   const isAdmin = group.adminUid === currentUser?.uid;
   const [uploading, setUploading] = useState(false);
+
+  const approveExpense = async (expense) => {
+    try {
+      if ((group.walletBalance || 0) < expense.amount) {
+        alert("Not enough wallet balance");
+        return;
+      }
+
+      const groupRef = doc(db, "groups", group.id);
+
+      const updatedRequests = group.expenseRequests.map((req) =>
+        req.createdAt === expense.createdAt
+          ? {
+              ...req,
+              status: "approved",
+            }
+          : req
+      );
+
+      await updateDoc(groupRef, {
+        walletBalance:
+          (group.walletBalance || 0) - Number(expense.amount),
+
+        expenseRequests: updatedRequests,
+
+        transactions: arrayUnion({
+          type: "expense",
+          amount: Number(expense.amount),
+          category: expense.category || "Other",
+          title: expense.title || "Expense",
+          userName:
+            expense.requestedByName ||
+            expense.userName ||
+            "User",
+          createdAt: new Date().toISOString(),
+        }),
+      });
+
+      alert("Expense approved");
+    } catch (error) {
+      console.error(error);
+      alert("Approval failed");
+    }
+  };
 
   const updateRequest = async (requestIndex, newStatus) => {
     const updatedRequests = [...requests];
@@ -94,7 +138,7 @@ export default function ExpenseApproval({ group }) {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
       <h2 className="text-3xl font-bold text-red-600 mb-6">
         Expense Approval Center
       </h2>
@@ -106,18 +150,18 @@ export default function ExpenseApproval({ group }) {
           {requests.map((request, index) => (
             <div
               key={index}
-              className="bg-[#fff8f2] border border-red-100 rounded-2xl p-5"
+              className="bg-[#fff8f2] dark:bg-slate-800 border border-red-100 dark:border-slate-700 rounded-2xl p-5"
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-slate-900 text-lg">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-lg">
                     {request.title}
                   </h3>
-                  <p className="text-slate-500">{request.category}</p>
+                  <p className="text-slate-500 dark:text-slate-400">{request.category}</p>
                   <p className="text-red-600 font-black text-xl mt-2">
                     ₹{request.amount}
                   </p>
-                  <p className="text-sm text-slate-500 mt-2">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
                     Requested by {request.requestedByName}
                   </p>
                 </div>
@@ -140,7 +184,7 @@ export default function ExpenseApproval({ group }) {
               {isAdmin && request.status === "pending" && (
                 <div className="flex gap-3 mt-5">
                   <button
-                    onClick={() => updateRequest(index, "approved")}
+                    onClick={() => approveExpense(request)}
                     className="flex-1 bg-green-500 text-white p-3 rounded-2xl font-bold flex items-center justify-center gap-2"
                   >
                     <CheckCircle size={18} />

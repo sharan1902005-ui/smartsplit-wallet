@@ -69,7 +69,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fff8e7] via-[#fff3d4] to-[#ffe7dc] flex">
+    <div className="min-h-screen bg-gradient-to-br from-[#fff8e7] via-[#fff3d4] to-[#ffe7dc] dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 flex">
       
       {/* LEFT PREMIUM SIDE */}
       <div className="hidden md:flex w-1/2 relative px-16 py-14 flex-col justify-between overflow-hidden">
@@ -83,7 +83,7 @@ export default function Login() {
             </div>
 
             <div>
-              <h1 className="text-5xl font-black text-slate-900">
+              <h1 className="text-5xl font-black text-slate-900 dark:text-white">
                 SmartSplit
               </h1>
               <p className="text-slate-600 mt-2">
@@ -92,7 +92,7 @@ export default function Login() {
             </div>
           </div>
 
-          <h2 className="text-6xl font-black text-slate-900 leading-tight">
+          <h2 className="text-6xl font-black text-slate-900 dark:text-white leading-tight">
             Split expenses.
             <br />
             Travel smarter.
@@ -104,7 +104,7 @@ export default function Login() {
           </p>
         </div>
 
-        <div className="relative z-10 bg-white/80 backdrop-blur-xl border border-red-100 rounded-3xl p-8 shadow-2xl">
+        <div className="relative z-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-red-100 dark:border-slate-700 rounded-3xl p-8 shadow-2xl">
           <div className="flex items-center gap-3 mb-6">
             <Sparkles className="text-red-500" />
             <span className="font-semibold text-slate-800">
@@ -133,7 +133,7 @@ export default function Login() {
 
       {/* RIGHT LOGIN */}
       <div className="w-full md:w-1/2 flex items-center justify-center px-8">
-        <div className="w-full max-w-md bg-white/85 backdrop-blur-xl border border-red-100 rounded-3xl shadow-2xl p-10">
+        <div className="w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-red-100 dark:border-slate-700 rounded-3xl shadow-2xl p-10">
 
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
@@ -143,11 +143,11 @@ export default function Login() {
               </span>
             </div>
 
-            <h2 className="text-4xl font-black text-slate-900">
+            <h2 className="text-4xl font-black text-slate-900 dark:text-white">
               {isSignup ? "Create account" : "Welcome back"}
             </h2>
 
-            <p className="text-slate-500 mt-3 text-lg">
+            <p className="text-slate-500 dark:text-slate-400 mt-3 text-lg">
               {isSignup
                 ? "Start your SmartSplit journey."
                 : "Sign in to continue managing expenses."}
@@ -160,7 +160,7 @@ export default function Login() {
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-4 rounded-2xl border border-red-100 bg-[#fffdf8] text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-200"
+              className="w-full px-5 py-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-[#fffdf8] dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-200"
             />
 
             <input
@@ -168,7 +168,7 @@ export default function Login() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 rounded-2xl border border-red-100 bg-[#fffdf8] text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-200"
+              className="w-full px-5 py-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-[#fffdf8] dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-200"
             />
 
             <button
@@ -192,7 +192,7 @@ export default function Login() {
             <button
               onClick={signInWithGoogle}
               disabled={loading}
-              className="w-full py-4 rounded-2xl border border-red-100 bg-white text-slate-900 font-semibold hover:bg-red-50 transition shadow-sm"
+              className="w-full py-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold hover:bg-red-50 dark:hover:bg-slate-700 transition shadow-sm"
             >
               Continue with Google
             </button>

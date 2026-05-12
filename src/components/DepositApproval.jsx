@@ -118,17 +118,17 @@ export default function DepositApproval({
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
       <div className="flex items-center gap-4 mb-6">
         <div className="bg-red-500 text-white p-4 rounded-2xl">
           <Wallet size={22} />
         </div>
 
         <div>
-          <h2 className="text-3xl font-black">
+          <h2 className="text-3xl font-black text-slate-900 dark:text-white">
             Deposit Approvals
           </h2>
-          <p className="text-slate-500">
+          <p className="text-slate-500 dark:text-slate-400">
             Verify payments before wallet update
           </p>
         </div>
@@ -144,7 +144,7 @@ export default function DepositApproval({
             (deposit, index) => (
               <div
                 key={index}
-                className="bg-[#fff8f2] border border-red-100 rounded-2xl p-5 flex justify-between items-center"
+                className="bg-[#fff8f2] dark:bg-slate-800 border border-red-100 dark:border-slate-700 rounded-2xl p-5 flex justify-between items-center"
               >
                 <div>
                   <h3 className="font-bold text-lg">

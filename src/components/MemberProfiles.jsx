@@ -4,7 +4,7 @@ export default function MemberProfiles({ group }) {
   const members = group.members || [];
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
       <h2 className="text-3xl font-bold text-red-600 mb-6">
         Group Members
       </h2>
@@ -17,7 +17,7 @@ export default function MemberProfiles({ group }) {
           return (
             <div
               key={member.uid || index}
-              className="bg-[#fff8f2] border border-red-100 rounded-2xl p-5 flex items-center justify-between"
+              className="bg-[#fff8f2] dark:bg-slate-800 border border-red-100 dark:border-slate-700 rounded-2xl p-5 flex items-center justify-between"
             >
               <div className="flex items-center gap-4">
                 <img
@@ -30,11 +30,11 @@ export default function MemberProfiles({ group }) {
                 />
 
                 <div>
-                  <h3 className="font-bold text-slate-900 text-lg">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-lg">
                     {member.name || "Member"}
                   </h3>
 
-                  <div className="flex items-center gap-2 text-slate-500 text-sm">
+                  <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
                     <Mail size={14} />
                     {member.email}
                   </div>

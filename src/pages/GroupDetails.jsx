@@ -23,10 +23,10 @@ import InviteByEmail from "../components/InviteByEmail";
 import ActivityTimeline from "../components/ActivityTimeline";
 import ExportPDF from "../components/ExportPDF";
 import ExportReport from "../components/ExportReport";
+import AnalyticsChart from "../components/AnalyticsChart";
 import BudgetAlerts from "../components/BudgetAlerts";
 import SplitExpense from "../components/SplitExpense";
 import ExpenseApproval from "../components/ExpenseApproval";
-import AdminPayoutDashboard from "../components/AdminPayoutDashboard";
 import AISuggestions from "../components/AISuggestions";
 import Notifications from "../components/Notifications";
 import ExpenseRequests from "../components/ExpenseRequests";
@@ -42,6 +42,7 @@ export default function GroupDetails() {
 
   const [group, setGroup] = useState(null);
   const [amount, setAmount] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     const unsub = onSnapshot(doc(db, "groups", id), (snap) => {
@@ -74,7 +75,7 @@ export default function GroupDetails() {
 
   if (!group) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#fff8e7]">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900">
         <div className="text-2xl font-bold text-red-600 animate-pulse">
           Loading SmartSplit...
         </div>
@@ -83,10 +84,10 @@ export default function GroupDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fff8e7] via-[#fff3d4] to-[#ffe5d9] text-slate-900 p-8">
+    <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-8 pb-28 md:pb-8">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-10">
-        <div className="bg-white/80 backdrop-blur-xl border border-red-100 rounded-3xl shadow-2xl p-8">
+        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-red-100 dark:border-slate-700 rounded-3xl shadow-2xl p-8">
           <div className="flex flex-col md:flex-row justify-between gap-8">
             <div>
               <h1 className="text-5xl font-black text-red-600 mb-3">
@@ -144,71 +145,109 @@ export default function GroupDetails() {
         </div>
       </div>
 
-      {/* Main Grid */}
-      <div className="max-w-7xl mx-auto grid gap-8">
-        <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
-          <ExpenseInsights group={group} />
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6 min-h-[420px]">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="text-red-500" />
-              <h2 className="text-2xl font-bold text-red-600">
-                Wallet Analytics
-              </h2>
-            </div>
-            <ExpenseChart group={group} />
-          </div>
-
-          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
-            <MemberContribution group={group} />
-          </div>
-        </div>
-
-        <MemberProfiles group={group} />
-
-        <InviteByEmail group={group} />
-
-        <BudgetAlerts group={group} />
-
-        <SettlementCalculator group={group} />
-
-        <ExportReport group={group} />
-
-        <ActivityTimeline group={group} />
-
-        <BudgetAlerts group={group} />
-
-        <SplitExpense group={group} />
-
-        <ExpenseApproval group={group} />
-
-        <AdminPayoutDashboard group={group} />
-
-        <ExportPDF group={group} />
-
-        <div className="grid md:grid-cols-2 gap-8">
-          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
-            <AISuggestions group={group} />
-          </div>
-
-          <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
-            <Notifications group={group} />
-          </div>
-        </div>
-
-        <ExpenseRequests group={group} />
-
-        <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-6">
-          <GroupChat group={group} />
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-8">
-          <RealUPIPayment group={group} />
-          <DepositApproval group={group} />
+      {/* Desktop Tab Nav */}
+      <div className="hidden md:block max-w-7xl mx-auto sticky top-0 z-50 bg-white dark:bg-slate-900 border border-red-100 dark:border-slate-700 rounded-3xl shadow-lg p-3 mb-6">
+        <div className="grid grid-cols-5 gap-2">
+          <TabButton label="Home" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
+          <TabButton label="Wallet" active={activeTab === "wallet"} onClick={() => setActiveTab("wallet")} />
+          <TabButton label="Expense" active={activeTab === "expenses"} onClick={() => setActiveTab("expenses")} />
+          <TabButton label="Members" active={activeTab === "members"} onClick={() => setActiveTab("members")} />
+          <TabButton label="Chat" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} />
         </div>
       </div>
+
+      {/* Mobile Bottom Tab Nav */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-red-100 dark:border-slate-700 shadow-2xl md:hidden">
+        <div className="grid grid-cols-5 gap-2 p-3">
+          <TabButton label="🏠" active={activeTab === "overview"} onClick={() => setActiveTab("overview")} />
+          <TabButton label="💰" active={activeTab === "wallet"} onClick={() => setActiveTab("wallet")} />
+          <TabButton label="💸" active={activeTab === "expenses"} onClick={() => setActiveTab("expenses")} />
+          <TabButton label="👥" active={activeTab === "members"} onClick={() => setActiveTab("members")} />
+          <TabButton label="💬" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} />
+        </div>
+      </div>
+
+      {/* Main Grid */}
+      <div className="max-w-7xl mx-auto grid gap-8">
+
+        {activeTab === "overview" && (
+          <>
+            <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-6">
+              <ExpenseInsights group={group} />
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-6 min-h-[420px]">
+                <div className="flex items-center gap-2 mb-4">
+                  <Sparkles className="text-red-500" />
+                  <h2 className="text-2xl font-bold text-red-600">Wallet Analytics</h2>
+                </div>
+                <ExpenseChart group={group} />
+              </div>
+
+              <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-6">
+                <MemberContribution group={group} />
+              </div>
+            </div>
+
+            <BudgetAlerts group={group} />
+            <AISuggestions group={group} />
+            <AnalyticsChart group={group} />
+            <ActivityTimeline group={group} />
+            <ExportReport group={group} />
+          </>
+        )}
+
+        {activeTab === "wallet" && (
+          <>
+            <SettlementCalculator group={group} />
+            <div className="grid md:grid-cols-2 gap-8">
+              <RealUPIPayment group={group} />
+              <DepositApproval group={group} />
+            </div>
+            <Notifications group={group} />
+          </>
+        )}
+
+        {activeTab === "expenses" && (
+          <>
+            <ExpenseRequestForm group={group} />
+            <ExpenseApproval group={group} />
+            <ExpenseRequests group={group} />
+            <SplitExpense group={group} />
+            <ExportPDF group={group} />
+          </>
+        )}
+
+        {activeTab === "members" && (
+          <>
+            <MemberProfiles group={group} />
+            <InviteByEmail group={group} />
+          </>
+        )}
+
+        {activeTab === "chat" && (
+          <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-6">
+            <GroupChat group={group} />
+          </div>
+        )}
+
+      </div>
     </div>
+  );
+}
+
+function TabButton({ label, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`p-3 rounded-2xl font-bold text-sm transition ${
+        active
+          ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg"
+          : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-red-100 dark:border-slate-700"
+      }`}
+    >
+      {label}
+    </button>
   );
 }

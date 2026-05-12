@@ -84,7 +84,7 @@ export default function BudgetAlerts({ group }) {
   }
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
+    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
       <h2 className="text-3xl font-bold text-red-600 mb-6">
         Smart Budget Alerts
       </h2>
@@ -95,8 +95,8 @@ export default function BudgetAlerts({ group }) {
             key={index}
             className={`rounded-2xl p-5 flex gap-4 items-start border ${
               alert.type === "warning"
-                ? "bg-yellow-50 border-yellow-200"
-                : "bg-green-50 border-green-200"
+                ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
+                : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
             }`}
           >
             <div>
@@ -108,11 +108,11 @@ export default function BudgetAlerts({ group }) {
             </div>
 
             <div>
-              <h3 className="font-bold text-slate-900">
+              <h3 className="font-bold text-slate-900 dark:text-white">
                 {alert.title}
               </h3>
 
-              <p className="text-slate-500 text-sm mt-1">
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
                 {alert.message}
               </p>
             </div>

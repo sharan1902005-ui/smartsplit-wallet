@@ -240,7 +240,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <AnalyticsChart groups={groups} />
+        {groups.length > 0 && (
+          <AnalyticsChart group={groups[0]} />
+        )}
       </div>
 
       <button

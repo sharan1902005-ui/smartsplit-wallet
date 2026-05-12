@@ -252,3 +252,14 @@ input {
 .recharts-legend-item-text {
   color: #1e293b !important;
 }
+
+@layer base {
+  body {
+    @apply bg-[#fff8e7] text-slate-900 transition-colors duration-300;
+  }
+
+  .dark body {
+    background: #0f172a;
+    color: #f8fafc;
+  }
+}
