@@ -23,10 +23,10 @@ export default function MemberProfiles({ group }) {
                 <img
                   src={
                     member.photo ||
-                    "https://ui-avatars.com/api/?name=User"
+                    `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(member.name || "User")}`
                   }
                   alt={member.name}
-                  className="w-14 h-14 rounded-full object-cover border"
+                  className="w-14 h-14 rounded-full object-cover border-2 border-red-200"
                 />
 
                 <div>

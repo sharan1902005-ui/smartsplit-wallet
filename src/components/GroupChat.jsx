@@ -9,6 +9,7 @@ import { Send } from "lucide-react";
 
 export default function GroupChat({ group }) {
   const [message, setMessage] = useState("");
+  const user = auth.currentUser;
 
   const sendMessage = async () => {
     if (!message.trim()) return;
@@ -17,13 +18,12 @@ export default function GroupChat({ group }) {
       chatMessages: arrayUnion({
         id: Date.now(),
         text: message,
-        userId: auth.currentUser.uid,
+        userId: user.uid,
         userName:
-          auth.currentUser.displayName ||
-          auth.currentUser.email ||
+          user.displayName ||
+          user.email ||
           "User",
-        userPhoto:
-          auth.currentUser.photoURL || "",
+        userPhoto: user.photoURL || "",
         createdAt: new Date().toISOString(),
       }),
     });
@@ -32,8 +32,7 @@ export default function GroupChat({ group }) {
   };
 
   const messages = (group.chatMessages || []).sort(
-    (a, b) =>
-      new Date(a.createdAt) - new Date(b.createdAt)
+    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
   );
 
   return (
@@ -42,74 +41,80 @@ export default function GroupChat({ group }) {
         Group Chat
       </h2>
 
-      <div className="max-h-[400px] overflow-y-auto space-y-4 mb-6">
+      <div className="space-y-4 max-h-[400px] overflow-y-auto p-4 bg-[#fff8f2] dark:bg-slate-900 rounded-3xl">
         {messages.length === 0 ? (
-          <p className="text-slate-500">
-            No messages yet.
+          <p className="text-slate-500 text-center py-8">
+            No messages yet. Say hi! 👋
           </p>
         ) : (
-          messages.map((msg) => {
-            const isMe =
-              msg.userId === auth.currentUser.uid;
+          messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex items-end gap-3 ${
+                message.userId === user.uid
+                  ? "justify-end"
+                  : "justify-start"
+              }`}
+            >
+              {message.userId !== user.uid && (
+                <img
+                  src={
+                    message.userPhoto ||
+                    `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${message.userName}`
+                  }
+                  alt={message.userName}
+                  className="w-10 h-10 rounded-full shadow-md"
+                />
+              )}
 
-            return (
               <div
-                key={msg.id}
-                className={`flex ${
-                  isMe
-                    ? "justify-end"
-                    : "justify-start"
+                className={`max-w-[70%] rounded-3xl px-5 py-3 shadow-md ${
+                  message.userId === user.uid
+                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
+                    : "bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                 }`}
               >
-                <div
-                  className={`max-w-[75%] rounded-2xl p-4 ${
-                    isMe
-                      ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
-                      : "bg-[#fff8f2] dark:bg-slate-800"
-                  }`}
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <img
-                      src={
-                        msg.userPhoto ||
-                        "https://ui-avatars.com/api/?name=User"
-                      }
-                      alt=""
-                      className="w-8 h-8 rounded-full"
-                    />
-
-                    <span className="font-bold text-sm">
-                      {msg.userName}
-                    </span>
-                  </div>
-
-                  <p>{msg.text}</p>
-
-                  <p className="text-xs opacity-70 mt-2">
-                    {new Date(
-                      msg.createdAt
-                    ).toLocaleTimeString()}
+                {message.userId !== user.uid && (
+                  <p className="text-xs font-bold mb-1 opacity-70">
+                    {message.userName}
                   </p>
-                </div>
+                )}
+
+                <p className="text-sm">
+                  {message.text}
+                </p>
+
+                <p className="text-[10px] mt-2 opacity-70 text-right">
+                  {message.createdAt?.toDate
+                    ? message.createdAt
+                        .toDate()
+                        .toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                    : new Date(message.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                </p>
               </div>
-            );
-          })
+            </div>
+          ))
         )}
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 mt-4">
         <input
           value={message}
-          onChange={(e) =>
-            setMessage(e.target.value)
-          }
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Type message..."
-          className="flex-1 p-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-white dark:bg-slate-800"
+          className="flex-1 px-5 py-4 rounded-2xl border border-red-200 focus:outline-none dark:bg-slate-800 dark:border-slate-700 dark:text-white"
         />
 
         <button
           onClick={sendMessage}
-          className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 rounded-2xl font-bold flex items-center gap-2"
+          className="px-6 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold shadow-lg flex items-center gap-2"
         >
           <Send size={18} />
           Send

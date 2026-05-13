@@ -62,7 +62,7 @@ export default function Dashboard() {
         if (t.type === "expense") expenses += t.amount || 0;
       });
       (g.members || []).forEach((m) => members.add(m.uid));
-      activities.push(...(g.activityTimeline || []));
+      activities.push(...(g.transactions || []));
     });
 
     activities.sort(
@@ -217,9 +217,22 @@ export default function Dashboard() {
                       <div className="flex gap-3 items-start">
                         <Clock3 size={18} className="mt-1 text-red-500" />
                         <div>
-                          <p className="font-semibold">{a.text}</p>
+                          <p className="font-medium text-sm">
+                            {a.message ||
+                              a.description ||
+                              a.text ||
+                              (a.type === "deposit"
+                                ? `${a.userName || "Someone"} added ₹${a.amount} to wallet`
+                                : a.type === "expense"
+                                ? `${a.userName || "Someone"} spent ₹${a.amount} on ${a.title || "expense"}`
+                                : "Activity update")}
+                          </p>
                           <p className="text-xs text-slate-500 mt-1">
-                            {new Date(a.createdAt).toLocaleString()}
+                            {a.createdAt?.toDate
+                              ? a.createdAt.toDate().toLocaleString()
+                              : a.createdAt
+                              ? new Date(a.createdAt).toLocaleString()
+                              : ""}
                           </p>
                         </div>
                       </div>

@@ -27,6 +27,15 @@ const COLORS = [
 export default function AnalyticsChart({
   group,
 }) {
+  if (!group) {
+    return (
+      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
+        <p className="text-slate-500 dark:text-slate-400">
+          Loading analytics...
+        </p>
+      </div>
+    );
+  }
   const transactions =
     group?.transactions || [];
 
