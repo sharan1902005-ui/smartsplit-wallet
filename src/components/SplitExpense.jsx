@@ -38,23 +38,18 @@ export default function SplitExpense({ group }) {
       Number(amount) / selectedMembers.length;
 
     await updateDoc(doc(db, "groups", group.id), {
-      walletBalance:
-        group.walletBalance - Number(amount),
-
       transactions: arrayUnion({
-        type: "expense",
+        type: "split",
         title,
         amount: Number(amount),
         category,
         splitMembers: selectedMembers,
         sharePerPerson: share,
-
         user: auth.currentUser.uid,
         userName:
           auth.currentUser.displayName ||
           auth.currentUser.email ||
           "User",
-
         createdAt: new Date().toISOString(),
       }),
     });
