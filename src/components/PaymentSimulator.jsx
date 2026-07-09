@@ -24,7 +24,7 @@ export default function PaymentSimulator({ group }) {
   };
 
   return (
-    <div className="bg-slate-900 rounded-3xl p-8 shadow-xl mt-10">
+    <div className="bg-[#F8F4EA] dark:bg-[#221F1A] border border-[#C7B98F] dark:border-[#3a352b] rounded-md p-8 shadow-xl mt-10">
       <h2 className="text-3xl font-bold mb-6">
         UPI Payment Simulator
       </h2>
@@ -34,12 +34,12 @@ export default function PaymentSimulator({ group }) {
         placeholder="Enter amount"
         value={payAmount}
         onChange={(e) => setPayAmount(e.target.value)}
-        className="w-full p-4 rounded-xl bg-slate-800 text-white mb-4"
+        className="w-full p-4 rounded-md bg-[#EAE1CC] dark:bg-[#171512] text-[#24322E] dark:text-[#EFE7D6] mb-4"
       />
 
       <button
         onClick={simulatePayment}
-        className="w-full bg-green-600 hover:bg-green-500 p-4 rounded-xl"
+        className="w-full bg-[#3F6B4F] text-[#F8F4EA] p-4 rounded-md"
       >
         Pay to Wallet
       </button>

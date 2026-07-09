@@ -9,59 +9,74 @@ export default function ExpenseInsights({ group }) {
 
   const biggestExpense =
     expenses.length > 0
-      ? expenses.reduce((max, t) =>
-          t.amount > max.amount ? t : max
-        )
+      ? expenses.reduce((max, t) => (t.amount > max.amount ? t : max))
       : null;
 
   const spendPercent =
     totalAdded > 0 ? ((totalSpent / totalAdded) * 100).toFixed(1) : 0;
 
-  let insight = "Wallet is healthy ✅";
+  let insight = "Wallet is healthy";
 
   if (spendPercent > 70) {
-    insight = "⚠️ Wallet running low";
+    insight = "Wallet running low";
   }
 
   if (spendPercent > 90) {
-    insight = "🚨 Critical spending level";
+    insight = "Critical spending level";
   }
 
   return (
-    <div className="bg-slate-900 rounded-3xl p-8 shadow-xl mt-10">
-      <h2 className="text-3xl font-bold mb-6">
-        Smart Expense Insights
-      </h2>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-slate-800 p-5 rounded-2xl">
-          <p className="text-slate-400">Total Added</p>
-          <h3 className="text-2xl font-bold">₹{totalAdded}</h3>
-        </div>
-
-        <div className="bg-slate-800 p-5 rounded-2xl">
-          <p className="text-slate-400">Total Spent</p>
-          <h3 className="text-2xl font-bold">₹{totalSpent}</h3>
-        </div>
-
-        <div className="bg-slate-800 p-5 rounded-2xl">
-          <p className="text-slate-400">Wallet Health</p>
-          <h3 className="text-2xl font-bold">{spendPercent}% used</h3>
-        </div>
-
-        <div className="bg-slate-800 p-5 rounded-2xl">
-          <p className="text-slate-400">Biggest Expense</p>
-          <h3 className="text-2xl font-bold">
-            {biggestExpense
-              ? `${biggestExpense.title} ₹${biggestExpense.amount}`
-              : "None"}
-          </h3>
-        </div>
+    <section className="rounded-md border border-[#C7B98F] bg-[#F8F4EA] p-6 shadow-sm dark:border-[#3a352b] dark:bg-[#221F1A]">
+      <div className="mb-5">
+        <h2 className="font-['Big_Shoulders_Display'] text-3xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
+          Smart Expense Insights
+        </h2>
+        <p className="text-sm text-[#6b6350] dark:text-[#a89a6d]">
+          Snapshot of wallet inflow, spending, and health
+        </p>
       </div>
 
-      <div className="mt-6 bg-indigo-600 p-5 rounded-2xl">
-        <h3 className="text-xl font-bold">{insight}</h3>
+      <div className="relative border-t-2 border-dashed border-[#C7B98F] dark:border-[#3a352b] my-5">
+        <div className="absolute -left-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
+        <div className="absolute -right-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
       </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <InsightStat label="Total Added" value={`Rs. ${totalAdded}`} tone="green" />
+        <InsightStat label="Total Spent" value={`Rs. ${totalSpent}`} tone="red" />
+        <InsightStat label="Wallet Health" value={`${spendPercent}% used`} tone="gold" />
+        <InsightStat
+          label="Biggest Expense"
+          value={biggestExpense ? `${biggestExpense.title} Rs. ${biggestExpense.amount}` : "None"}
+          tone="ink"
+        />
+      </div>
+
+      <div className="mt-5 rounded-md border border-[#D9A441] bg-[#EAE1CC] p-5 dark:bg-[#171512]">
+        <h3 className="font-['Big_Shoulders_Display'] text-2xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
+          {insight}
+        </h3>
+      </div>
+    </section>
+  );
+}
+
+function InsightStat({ label, value, tone }) {
+  const color = {
+    green: "text-[#3F6B4F]",
+    red: "text-[#B23A2E]",
+    gold: "text-[#D9A441]",
+    ink: "text-[#24322E] dark:text-[#EFE7D6]",
+  }[tone];
+
+  return (
+    <div className="rounded-md border border-[#C7B98F] bg-[#EAE1CC] p-5 dark:border-[#3a352b] dark:bg-[#171512]">
+      <p className="text-sm font-semibold text-[#6b6350] dark:text-[#a89a6d]">
+        {label}
+      </p>
+      <h3 className={`mt-2 font-['IBM_Plex_Mono'] text-2xl font-bold ${color}`}>
+        {value}
+      </h3>
     </div>
   );
 }

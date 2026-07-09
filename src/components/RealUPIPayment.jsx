@@ -1,10 +1,12 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { QRCodeCanvas } from "qrcode.react";
 import {
   Smartphone,
   Wallet,
   CheckCircle,
   Trophy,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import {
   doc,
@@ -12,6 +14,7 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import { db, auth } from "../firebase/config";
+import { cleanDisplayName } from "../utils/memberDisplay";
 
 export default function RealUPIPayment({ group }) {
   const [amount, setAmount] = useState("");
@@ -19,6 +22,7 @@ export default function RealUPIPayment({ group }) {
     useState(false);
   const [loading, setLoading] =
     useState(false);
+  const [notice, setNotice] = useState(null);
 
   const adminUpi = group?.adminUpi || "";
 
@@ -35,22 +39,32 @@ export default function RealUPIPayment({ group }) {
 
   const payOnPhone = () => {
     if (!amount || Number(amount) <= 0) {
-      alert("Enter valid amount");
+      setNotice({
+        type: "error",
+        text: "Enter a valid amount",
+      });
       return;
     }
 
     if (!adminUpi) {
-      alert("Admin UPI not configured");
+      setNotice({
+        type: "error",
+        text: "Admin UPI not configured",
+      });
       return;
     }
 
+    setNotice(null);
     setPaymentStarted(true);
     window.location.href = upiUrl;
   };
 
   const confirmPayment = async () => {
     if (!amount || Number(amount) <= 0) {
-      alert("Enter valid amount");
+      setNotice({
+        type: "error",
+        text: "Enter a valid amount",
+      });
       return;
     }
 
@@ -73,9 +87,10 @@ export default function RealUPIPayment({ group }) {
           amount: Number(amount),
           title: "Wallet Deposit",
           userName:
-            auth.currentUser?.displayName ||
-            auth.currentUser?.email ||
-            "Member",
+            cleanDisplayName(
+              auth.currentUser?.displayName || auth.currentUser?.email,
+              "Member"
+            ),
           userId:
             auth.currentUser?.uid || "",
           createdAt:
@@ -83,17 +98,20 @@ export default function RealUPIPayment({ group }) {
         }),
       });
 
-      alert(
-        "Payment confirmed. Wallet updated."
-      );
+      setNotice({
+        type: "success",
+        text: "Confirmed",
+      });
 
       setAmount("");
       setPaymentStarted(false);
+      setTimeout(() => setNotice(null), 2000);
     } catch (error) {
       console.error(error);
-      alert(
-        "Failed to update wallet"
-      );
+      setNotice({
+        type: "error",
+        text: "Failed to update wallet",
+      });
     } finally {
       setLoading(false);
     }
@@ -108,7 +126,7 @@ export default function RealUPIPayment({ group }) {
 
   depositTransactions.forEach((txn) => {
     const name =
-      txn.userName || "Unknown";
+      cleanDisplayName(txn.userName, "Unknown");
 
     contributorsMap[name] =
       (contributorsMap[name] || 0) +
@@ -129,38 +147,67 @@ export default function RealUPIPayment({ group }) {
     `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(name || "user")}`;
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
+    <div className="bg-[#F8F4EA] dark:bg-[#221F1A] rounded-md shadow-xl border border-[#C7B98F] dark:border-[#3a352b] p-8">
       <div className="flex items-center gap-4 mb-6">
-        <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white p-4 rounded-2xl">
+        <div className="bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] p-4 rounded-md">
           <Wallet size={24} />
         </div>
 
         <div>
-          <h2 className="text-3xl font-black text-slate-900 dark:text-white">
+          <h2 className="font-['Big_Shoulders_Display'] text-4xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
             Add Money
           </h2>
 
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-[#6b6350] dark:text-[#a89a6d]">
             Pay directly to shared wallet UPI
           </p>
         </div>
       </div>
 
-      <div className="bg-[#fff8f2] dark:bg-slate-900 rounded-2xl p-6 mb-6">
-        <p className="text-slate-500 dark:text-slate-400 text-sm">
+      {notice && (
+        <div
+          className={`mb-5 flex items-center justify-between gap-3 rounded-md border bg-[#EAE1CC] p-4 dark:bg-[#171512] ${
+            notice.type === "success"
+              ? "border-[#3F6B4F] text-[#3F6B4F]"
+              : "border-[#B23A2E] text-[#B23A2E]"
+          }`}
+        >
+          <div className="-rotate-6 flex items-center gap-2 rounded-md border border-current px-3 py-1">
+            {notice.type === "success" ? (
+              <CheckCircle size={18} />
+            ) : (
+              <AlertCircle size={18} />
+            )}
+            <span className="font-['Big_Shoulders_Display'] text-2xl font-extrabold uppercase tracking-tight">
+              {notice.type === "success" ? "Confirmed" : "Notice"}
+            </span>
+          </div>
+          <p className="text-sm font-semibold text-[#24322E] dark:text-[#EFE7D6]">
+            {notice.text}
+          </p>
+        </div>
+      )}
+
+      <div className="rounded-md border border-[#C7B98F] bg-[#EAE1CC] p-6 mb-5 dark:border-[#3a352b] dark:bg-[#171512]">
+        <p className="text-[#6b6350] dark:text-[#a89a6d] text-sm">
           Wallet Balance
         </p>
 
-        <p className="text-4xl font-black text-red-500 mt-2">
-          ₹{group.walletBalance || 0}
+        <p className="font-['IBM_Plex_Mono'] text-4xl font-black text-[#B23A2E] mt-2">
+          {"\u20B9"}{group.walletBalance || 0}
         </p>
 
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-4">
+        <p className="text-sm text-[#6b6350] dark:text-[#a89a6d] mt-4">
           Admin UPI:
-          <span className="font-bold ml-2 text-slate-900 dark:text-white">
+          <span className="font-['IBM_Plex_Mono'] font-bold ml-2 text-[#24322E] dark:text-[#EFE7D6]">
             {adminUpi || "Not configured"}
           </span>
         </p>
+      </div>
+
+      <div className="relative border-t-2 border-dashed border-[#C7B98F] dark:border-[#3a352b] my-5">
+        <div className="absolute -left-9 -top-3 w-6 h-6 rounded-full bg-[#F8F4EA] dark:bg-[#221F1A]" />
+        <div className="absolute -right-9 -top-3 w-6 h-6 rounded-full bg-[#F8F4EA] dark:bg-[#221F1A]" />
       </div>
 
       <input
@@ -170,23 +217,25 @@ export default function RealUPIPayment({ group }) {
         onChange={(e) =>
           setAmount(e.target.value)
         }
-        className="w-full p-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white mb-6"
+        className="w-full p-4 rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] text-[#24322E] dark:text-[#EFE7D6] mb-6 font-['IBM_Plex_Mono']"
       />
 
       {amount &&
         Number(amount) > 0 &&
         adminUpi && (
-          <div className="bg-[#fffdf8] dark:bg-slate-900 border border-orange-100 dark:border-slate-700 rounded-3xl p-6 mb-6 flex flex-col items-center">
-            <p className="font-bold text-slate-900 dark:text-white mb-4">
-              Scan QR to Pay
+          <div className="bg-[#EAE1CC] dark:bg-[#171512] border-2 border-dashed border-[#C7B98F] dark:border-[#3a352b] rounded-md p-6 mb-6 flex flex-col items-center">
+            <p className="font-['IBM_Plex_Mono'] text-xs font-bold uppercase tracking-widest text-[#6b6350] dark:text-[#a89a6d] mb-4">
+              QR Boarding Stub
             </p>
 
-            <QRCodeCanvas
-              value={upiUrl}
-              size={220}
-            />
+            <div className="rounded-md border border-[#C7B98F] bg-[#F8F4EA] p-4 dark:border-[#3a352b] dark:bg-[#221F1A]">
+              <QRCodeCanvas
+                value={upiUrl}
+                size={220}
+              />
+            </div>
 
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-4 text-center">
+            <p className="text-xs text-[#6b6350] dark:text-[#a89a6d] mt-4 text-center">
               Scan with Google Pay / PhonePe / Paytm
             </p>
           </div>
@@ -194,7 +243,7 @@ export default function RealUPIPayment({ group }) {
 
       <button
         onClick={payOnPhone}
-        className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white p-4 rounded-2xl font-bold flex items-center justify-center gap-3"
+        className="w-full bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] p-4 rounded-md font-bold flex items-center justify-center gap-3 transition hover:scale-[1.01] active:scale-[0.99]"
       >
         <Smartphone size={20} />
         Pay on This Phone
@@ -202,9 +251,9 @@ export default function RealUPIPayment({ group }) {
 
       {paymentStarted && (
         <>
-          <div className="mt-4 bg-yellow-50 dark:bg-slate-900 border border-yellow-200 dark:border-slate-700 rounded-2xl p-4 flex items-center gap-3">
-            <CheckCircle className="text-green-500" />
-            <p className="text-sm text-slate-700 dark:text-slate-300">
+          <div className="mt-4 bg-[#EAE1CC] dark:bg-[#171512] border border-[#D9A441] rounded-md p-4 flex items-center gap-3">
+            <CheckCircle className="text-[#D9A441]" />
+            <p className="text-sm text-[#24322E] dark:text-[#a89a6d]">
               After completing payment, click confirm payment.
             </p>
           </div>
@@ -212,10 +261,15 @@ export default function RealUPIPayment({ group }) {
           <button
             onClick={confirmPayment}
             disabled={loading}
-            className="w-full mt-4 bg-green-500 hover:bg-green-600 text-white p-4 rounded-2xl font-bold"
+            className="w-full mt-4 bg-[#3F6B4F] text-[#F8F4EA] p-4 rounded-md font-bold flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-80"
           >
             {loading
-              ? "Updating..."
+              ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" />
+                  Updating...
+                </>
+              )
               : "Confirm Payment"}
           </button>
         </>
@@ -223,14 +277,14 @@ export default function RealUPIPayment({ group }) {
 
       <div className="mt-10">
         <div className="flex items-center gap-3 mb-5">
-          <Trophy className="text-yellow-500" />
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+          <Trophy className="text-[#D9A441]" />
+          <h3 className="font-['Big_Shoulders_Display'] text-3xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
             Shared Wallet Contributors
           </h3>
         </div>
 
         {contributors.length === 0 ? (
-          <div className="bg-[#fff8f2] dark:bg-slate-900 rounded-2xl p-6 text-center text-slate-500">
+          <div className="bg-[#EAE1CC] dark:bg-[#171512] border border-dashed border-[#C7B98F] dark:border-[#3a352b] rounded-md p-6 text-center text-[#6b6350] dark:text-[#a89a6d]">
             No contributions yet.
           </div>
         ) : (
@@ -239,7 +293,7 @@ export default function RealUPIPayment({ group }) {
               (contributor, index) => (
                 <div
                   key={index}
-                  className="bg-[#fff8f2] dark:bg-slate-900 rounded-2xl p-4 flex items-center justify-between"
+                  className="bg-[#EAE1CC] dark:bg-[#171512] border border-[#C7B98F] dark:border-[#3a352b] rounded-md p-4 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-4">
                     <img
@@ -253,26 +307,26 @@ export default function RealUPIPayment({ group }) {
                     />
 
                     <div>
-                      <p className="font-bold text-slate-900 dark:text-white">
+                      <p className="font-bold text-[#24322E] dark:text-[#EFE7D6]">
                         {contributor.name}
                       </p>
 
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm text-[#6b6350]">
                         Contributor
                       </p>
                     </div>
                   </div>
 
                   <div className="text-right">
-                    <p className="text-red-500 font-black text-xl">
-                      ₹
+                    <p className="text-[#B23A2E] font-['IBM_Plex_Mono'] font-black text-xl">
+                      {"\u20B9"}
                       {
                         contributor.total
                       }
                     </p>
 
                     {index === 0 && (
-                      <p className="text-xs text-yellow-600 font-bold">
+                      <p className="text-xs text-[#D9A441] font-bold">
                         Top Contributor
                       </p>
                     )}
@@ -286,3 +340,5 @@ export default function RealUPIPayment({ group }) {
     </div>
   );
 }
+
+

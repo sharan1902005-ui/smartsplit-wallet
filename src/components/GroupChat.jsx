@@ -5,24 +5,23 @@ import {
   arrayUnion
 } from "firebase/firestore";
 import { db, auth } from "../firebase/config";
-import { Send } from "lucide-react";
+import { MessageCircle, Send } from "lucide-react";
+import MemberAvatar from "./MemberAvatar";
+import { cleanDisplayName } from "../utils/memberDisplay";
 
 export default function GroupChat({ group }) {
   const [message, setMessage] = useState("");
   const user = auth.currentUser;
 
   const sendMessage = async () => {
-    if (!message.trim()) return;
+    if (!message.trim() || !user) return;
 
     await updateDoc(doc(db, "groups", group.id), {
       chatMessages: arrayUnion({
         id: Date.now(),
-        text: message,
+        text: message.trim(),
         userId: user.uid,
-        userName:
-          user.displayName ||
-          user.email ||
-          "User",
+        userName: cleanDisplayName(user.displayName || user.email, "User"),
         userPhoto: user.photoURL || "",
         createdAt: new Date().toISOString(),
       }),
@@ -31,75 +30,93 @@ export default function GroupChat({ group }) {
     setMessage("");
   };
 
-  const messages = (group.chatMessages || []).sort(
-    (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-  );
+  const messages = (group.chatMessages || [])
+    .filter((item) => item?.text?.trim())
+    .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
-      <h2 className="text-3xl font-bold text-red-600 mb-6">
-        Group Chat
-      </h2>
+    <section className="rounded-md border border-[#C7B98F] bg-[#F8F4EA] p-6 shadow-sm dark:border-[#3a352b] dark:bg-[#221F1A]">
+      <div className="mb-5">
+        <h2 className="font-['Big_Shoulders_Display'] text-3xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
+          Group Chat
+        </h2>
+        <p className="text-sm text-[#6b6350] dark:text-[#a89a6d]">
+          Keep trip updates and expense context in one place
+        </p>
+      </div>
 
-      <div className="space-y-4 max-h-[400px] overflow-y-auto p-4 bg-[#fff8f2] dark:bg-slate-900 rounded-3xl">
+      <div className="relative border-t-2 border-dashed border-[#C7B98F] dark:border-[#3a352b] my-5">
+        <div className="absolute -left-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
+        <div className="absolute -right-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
+      </div>
+
+      <div className="min-h-[420px] space-y-4 max-h-[560px] overflow-y-auto rounded-md border border-[#C7B98F] bg-[#EAE1CC] p-4 dark:border-[#3a352b] dark:bg-[#171512]">
         {messages.length === 0 ? (
-          <p className="text-slate-500 text-center py-8">
-            No messages yet. Say hi! 👋
-          </p>
+          <div className="flex min-h-[360px] flex-col items-center justify-center text-center">
+            <div className="mb-4 rounded-full border border-[#C7B98F] bg-[#F8F4EA] p-4 text-[#B23A2E] dark:border-[#3a352b] dark:bg-[#221F1A]">
+              <MessageCircle size={28} />
+            </div>
+            <p className="font-['Big_Shoulders_Display'] text-2xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
+              No messages yet - say hi.
+            </p>
+            <p className="mt-2 max-w-sm text-sm text-[#6b6350] dark:text-[#a89a6d]">
+              The first message will appear here with the sender avatar and time.
+            </p>
+          </div>
         ) : (
-          messages.map((message) => (
-            <div
-              key={message.id}
-              className={`flex items-end gap-3 ${
-                message.userId === user.uid
-                  ? "justify-end"
-                  : "justify-start"
-              }`}
-            >
-              {message.userId !== user.uid && (
-                <img
-                  src={
-                    message.userPhoto ||
-                    `https://api.dicebear.com/7.x/fun-emoji/svg?seed=${message.userName}`
-                  }
-                  alt={message.userName}
-                  className="w-10 h-10 rounded-full shadow-md"
-                />
-              )}
+          messages.map((chatMessage) => {
+            const isCurrentUser = chatMessage.userId === user?.uid;
+            const chatName = cleanDisplayName(chatMessage.userName, "Member");
 
+            return (
               <div
-                className={`max-w-[70%] rounded-3xl px-5 py-3 shadow-md ${
-                  message.userId === user.uid
-                    ? "bg-gradient-to-r from-red-500 to-orange-500 text-white"
-                    : "bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
+                key={chatMessage.id}
+                className={`flex items-end gap-3 ${
+                  isCurrentUser ? "justify-end" : "justify-start"
                 }`}
               >
-                {message.userId !== user.uid && (
-                  <p className="text-xs font-bold mb-1 opacity-70">
-                    {message.userName}
-                  </p>
+                {!isCurrentUser && (
+                  <MemberAvatar
+                    src={chatMessage.userPhoto}
+                    name={chatName}
+                    className="w-10 h-10 rounded-full shadow-md"
+                  />
                 )}
 
-                <p className="text-sm">
-                  {message.text}
-                </p>
+                <div
+                  className={`max-w-[70%] rounded-md px-5 py-3 shadow-sm ${
+                    isCurrentUser
+                      ? "bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA]"
+                      : "bg-[#F8F4EA] dark:bg-[#221F1A] text-[#24322E] dark:text-[#EFE7D6] border border-[#C7B98F] dark:border-[#3a352b]"
+                  }`}
+                >
+                  {!isCurrentUser && (
+                    <p className="text-xs font-bold mb-1 opacity-70">
+                      {chatName}
+                    </p>
+                  )}
 
-                <p className="text-[10px] mt-2 opacity-70 text-right">
-                  {message.createdAt?.toDate
-                    ? message.createdAt
-                        .toDate()
-                        .toLocaleTimeString([], {
+                  <p className="text-sm">
+                    {chatMessage.text}
+                  </p>
+
+                  <p className="mt-2 text-right font-['IBM_Plex_Mono'] text-[10px] opacity-70">
+                    {chatMessage.createdAt?.toDate
+                      ? chatMessage.createdAt
+                          .toDate()
+                          .toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                      : new Date(chatMessage.createdAt).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
-                        })
-                    : new Date(message.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                </p>
+                        })}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
@@ -109,17 +126,17 @@ export default function GroupChat({ group }) {
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Type message..."
-          className="flex-1 px-5 py-4 rounded-2xl border border-red-200 focus:outline-none dark:bg-slate-800 dark:border-slate-700 dark:text-white"
+          className="flex-1 rounded-md border border-[#C7B98F] bg-[#F8F4EA] px-5 py-4 text-[#24322E] focus:outline-none focus:ring-4 focus:ring-[#B23A2E]/20 dark:border-[#3a352b] dark:bg-[#221F1A] dark:text-[#EFE7D6]"
         />
 
         <button
           onClick={sendMessage}
-          className="px-6 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold shadow-lg flex items-center gap-2"
+          className="px-6 rounded-md bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] font-bold shadow-lg flex items-center justify-center gap-2 transition hover:scale-[1.01] active:scale-[0.99]"
         >
           <Send size={18} />
           Send
         </button>
       </div>
-    </div>
+    </section>
   );
 }

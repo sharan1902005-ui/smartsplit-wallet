@@ -41,7 +41,7 @@ export default function ExpenseChart({ group }) {
 
   if (data.length === 0) {
     return (
-      <div className="h-[350px] flex items-center justify-center text-slate-500">
+      <div className="h-[350px] flex items-center justify-center text-[#6b6350]">
         No expense analytics yet.
       </div>
     );

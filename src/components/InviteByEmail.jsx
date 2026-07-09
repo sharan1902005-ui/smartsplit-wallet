@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { MailPlus } from "lucide-react";
+import { cleanDisplayName } from "../utils/memberDisplay";
 
 export default function InviteByEmail({ group }) {
   const [email, setEmail] = useState("");
@@ -35,6 +36,7 @@ export default function InviteByEmail({ group }) {
       }
 
       const userData = snapshot.docs[0].data();
+      const userName = cleanDisplayName(userData.name || userData.displayName || userData.email);
 
       const alreadyMember = (group.members || []).some(
         (m) => m.uid === userData.uid
@@ -49,14 +51,14 @@ export default function InviteByEmail({ group }) {
       await updateDoc(doc(db, "groups", group.id), {
         members: arrayUnion({
           uid: userData.uid,
-          name: userData.name,
+          name: userName,
           email: userData.email,
           photo: userData.photo,
         }),
 
         activityTimeline: arrayUnion({
           type: "invite",
-          text: `${userData.name} added to group`,
+          text: `${userName} added to group`,
           createdAt: new Date().toISOString(),
         }),
       });
@@ -71,8 +73,8 @@ export default function InviteByEmail({ group }) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
-      <h2 className="text-3xl font-bold text-red-600 mb-6">
+    <div className="bg-[#F8F4EA] dark:bg-[#221F1A] rounded-md shadow-xl border border-[#C7B98F] dark:border-[#3a352b] p-8">
+      <h2 className="text-3xl font-bold text-[#B23A2E] mb-6">
         Invite Member
       </h2>
 
@@ -83,13 +85,13 @@ export default function InviteByEmail({ group }) {
             setEmail(e.target.value)
           }
           placeholder="Enter email address"
-          className="flex-1 p-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-white dark:bg-slate-800"
+          className="flex-1 p-4 rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A]"
         />
 
         <button
           onClick={inviteUser}
           disabled={loading}
-          className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 rounded-2xl font-bold flex items-center gap-2"
+          className="bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] px-6 rounded-md font-bold flex items-center gap-2"
         >
           <MailPlus size={18} />
           {loading ? "Adding..." : "Invite"}
@@ -98,3 +100,4 @@ export default function InviteByEmail({ group }) {
     </div>
   );
 }
+

@@ -1,24 +1,26 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import {
   doc,
-  onSnapshot
+  onSnapshot,
+  updateDoc
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useParams } from "react-router-dom";
 import {
-  Wallet,
+  Home,
+  MessageCircle,
+  Receipt,
+  ShieldCheck,
   Users,
-  ShieldCheck
+  Wallet,
 } from "lucide-react";
 
-import ExpenseInsights from "../components/ExpenseInsights";
 import MemberContribution from "../components/MemberContribution";
 import SettlementCalculator from "../components/SettlementCalculator";
 import MemberProfiles from "../components/MemberProfiles";
 import InviteByEmail from "../components/InviteByEmail";
 import ActivityTimeline from "../components/ActivityTimeline";
 import ExportPDF from "../components/ExportPDF";
-import ExportReport from "../components/ExportReport";
 import AnalyticsChart from "../components/AnalyticsChart";
 import BudgetAlerts from "../components/BudgetAlerts";
 import SplitExpense from "../components/SplitExpense";
@@ -27,20 +29,40 @@ import ExpenseRequests from "../components/ExpenseRequests";
 import ExpenseHistory from "../components/ExpenseHistory";
 import RealUPIPayment from "../components/RealUPIPayment";
 import GroupChat from "../components/GroupChat";
+import { normalizeMemberRecord } from "../utils/memberDisplay";
+
+const tabs = [
+  { id: "home", label: "Home", icon: <Home size={18} /> },
+  { id: "wallet", label: "Wallet", icon: <Wallet size={18} /> },
+  { id: "expenses", label: "Expense", icon: <Receipt size={18} /> },
+  { id: "members", label: "Members", icon: <Users size={18} /> },
+  { id: "chat", label: "Chat", icon: <MessageCircle size={18} /> },
+];
 
 export default function GroupDetails() {
   const { id } = useParams();
-
   const [group, setGroup] = useState(null);
   const [activeTab, setActiveTab] = useState("home");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
-    const unsub = onSnapshot(doc(db, "groups", id), (snap) => {
+    const groupRef = doc(db, "groups", id);
+    const unsub = onSnapshot(groupRef, (snap) => {
       if (snap.exists()) {
+        const data = snap.data();
+        const members = data.members || [];
+        const normalizedMembers = members.map(normalizeMemberRecord);
+        const membersChanged =
+          JSON.stringify(members) !== JSON.stringify(normalizedMembers);
+
+        if (membersChanged) {
+          updateDoc(groupRef, { members: normalizedMembers }).catch(console.error);
+        }
+
         setGroup({
           id: snap.id,
-          ...snap.data(),
+          ...data,
+          members: normalizedMembers,
         });
       }
     });
@@ -48,147 +70,140 @@ export default function GroupDetails() {
     return () => unsub();
   }, [id]);
 
+  const metrics = useMemo(() => {
+    const transactions = group?.transactions || [];
+    const expenses = transactions
+      .filter((transaction) => transaction.type === "expense")
+      .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
+
+    return {
+      expenses,
+      members: group?.members?.length || 0,
+      transactions: transactions.length,
+      pendingApprovals: (group?.expenseRequests || []).filter(
+        (request) => request.status === "pending"
+      ).length,
+    };
+  }, [group]);
+
   if (!group) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900">
-        <div className="text-2xl font-bold text-red-600 animate-pulse">
+      <div className="min-h-screen flex items-center justify-center bg-[#EAE1CC] dark:bg-[#171512]">
+        <div className="text-2xl font-black text-[#B23A2E] animate-pulse">
           Loading group...
         </div>
       </div>
     );
   }
 
+  const activeTitle = tabs.find((tab) => tab.id === activeTab)?.label || "Home";
+
   return (
-    <div className="min-h-screen bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-8 pb-28 md:pb-8">
-      {/* Header */}
-      <div className="max-w-7xl mx-auto mb-10">
-        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-red-100 dark:border-slate-700 rounded-3xl shadow-2xl p-8">
-          <div className="flex flex-col lg:flex-row gap-6 justify-between">
+    <div className="min-h-screen bg-[#EAE1CC] dark:bg-[#171512] text-[#24322E] dark:text-[#EFE7D6]">
+      <div className="grid min-h-screen lg:grid-cols-[304px_1fr]">
+        <aside className="hidden lg:flex flex-col gap-6 border-r border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] px-6 py-8">
+          <SidebarHeader group={group} metrics={metrics} onAddMoney={() => setShowPaymentModal(true)} />
+
+          <nav className="space-y-2">
+            {tabs.map((tab) => (
+              <TabButton
+                key={tab.id}
+                icon={tab.icon}
+                label={tab.label}
+                active={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              />
+            ))}
+          </nav>
+        </aside>
+
+        <main className="min-w-0 px-4 py-5 sm:px-6 lg:px-8 lg:py-8 pb-28 lg:pb-8">
+          <div className="lg:hidden mb-5">
+            <MobileHeader group={group} metrics={metrics} onAddMoney={() => setShowPaymentModal(true)} />
+          </div>
+
+          <div className="hidden lg:flex items-start justify-between gap-6 mb-8">
             <div>
-              <h1 className="text-5xl font-black text-red-600 mb-3">
+              <p className="text-sm font-semibold uppercase tracking-widest text-[#6b6350] dark:text-[#a89a6d]">
                 {group.name}
+              </p>
+              <h1 className="text-4xl font-black tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
+                {activeTitle}
               </h1>
-
-              <p className="text-lg text-slate-600 mb-4">
-                Split expenses, manage wallet, and vibe smarter 💸
-              </p>
-
-              <div className="flex flex-wrap gap-4">
-                <div className="bg-yellow-100 px-5 py-3 rounded-2xl flex items-center gap-2 shadow">
-                  <ShieldCheck className="text-red-500" />
-                  <span className="font-semibold">
-                    Approval: {group.approvalMode}
-                  </span>
-                </div>
-
-                <div className="bg-red-100 px-5 py-3 rounded-2xl flex items-center gap-2 shadow">
-                  <Users className="text-red-500" />
-                  <span className="font-semibold">
-                    Invite: {group.inviteCode}
-                  </span>
-                </div>
-              </div>
             </div>
-
-            {/* Wallet Card */}
-            <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-3xl p-10 shadow-2xl text-white">
-              <div className="flex items-center gap-4 mb-6">
-                <Wallet size={36} />
-                <h2 className="text-4xl font-black">
-                  Wallet Balance
-                </h2>
-              </div>
-
-              <p className="text-7xl font-black mb-8">
-                ₹{group.walletBalance || 0}
-              </p>
-
-              <button
-                onClick={() => setShowPaymentModal(true)}
-                className="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 p-5 rounded-2xl font-black text-xl transition"
-              >
-                Add Money
-              </button>
+            <div className="grid grid-cols-3 gap-3 min-w-[480px]">
+              <MetricCard label="Expenses" value={`Rs. ${metrics.expenses}`} />
+              <MetricCard label="Members" value={metrics.members} />
+              <MetricCard label="Pending" value={metrics.pendingApprovals} tone="gold" />
             </div>
           </div>
-        </div>
+
+          <div className="mx-auto max-w-[1600px] space-y-6">
+            {activeTab === "home" && (
+              <>
+                <AISuggestions group={group} />
+                <AnalyticsChart group={group} />
+                <BudgetAlerts group={group} />
+                <ActivityTimeline group={group} />
+              </>
+            )}
+
+            {activeTab === "wallet" && (
+              <div className="grid xl:grid-cols-[1fr_420px] gap-6 items-start">
+                <SettlementCalculator group={group} />
+                <MemberContribution group={group} />
+              </div>
+            )}
+
+            {activeTab === "expenses" && (
+              <div className="grid xl:grid-cols-[1fr_420px] gap-6 items-start">
+                <div className="space-y-6">
+                  <ExpenseRequests group={group} />
+                  <ExpenseHistory group={group} />
+                </div>
+                <div className="space-y-6">
+                  <SplitExpense group={group} />
+                  <ExportPDF group={group} />
+                </div>
+              </div>
+            )}
+
+            {activeTab === "members" && (
+              <div className="grid xl:grid-cols-[1fr_420px] gap-6 items-start">
+                <MemberProfiles group={group} />
+                <InviteByEmail group={group} />
+              </div>
+            )}
+
+            {activeTab === "chat" && <GroupChat group={group} />}
+          </div>
+        </main>
       </div>
 
-      {/* Desktop Tab Nav */}
-      <div className="hidden md:block max-w-7xl mx-auto sticky top-0 z-50 bg-white dark:bg-slate-900 border border-red-100 dark:border-slate-700 rounded-3xl shadow-lg p-3 mb-6">
-        <div className="flex overflow-x-auto gap-2 scrollbar-hide">
-          <TabButton label="Home" active={activeTab === "home"} onClick={() => setActiveTab("home")} />
-          <TabButton label="Wallet" active={activeTab === "wallet"} onClick={() => setActiveTab("wallet")} />
-          <TabButton label="Expense" active={activeTab === "expenses"} onClick={() => setActiveTab("expenses")} />
-          <TabButton label="Members" active={activeTab === "members"} onClick={() => setActiveTab("members")} />
-          <TabButton label="Chat" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} />
-        </div>
-      </div>
-
-      {/* Mobile Bottom Tab Nav */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-red-100 dark:border-slate-700 shadow-2xl md:hidden">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#F8F4EA] dark:bg-[#221F1A] backdrop-blur-xl border-t border-[#C7B98F] dark:border-[#3a352b] shadow-2xl lg:hidden">
         <div className="grid grid-cols-5 gap-2 p-3">
-          <TabButton label="🏠" active={activeTab === "home"} onClick={() => setActiveTab("home")} />
-          <TabButton label="💰" active={activeTab === "wallet"} onClick={() => setActiveTab("wallet")} />
-          <TabButton label="💸" active={activeTab === "expenses"} onClick={() => setActiveTab("expenses")} />
-          <TabButton label="👥" active={activeTab === "members"} onClick={() => setActiveTab("members")} />
-          <TabButton label="💬" active={activeTab === "chat"} onClick={() => setActiveTab("chat")} />
+          {tabs.map((tab) => (
+            <TabButton
+              key={tab.id}
+              icon={tab.icon}
+              label={tab.label}
+              active={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              compact
+            />
+          ))}
         </div>
-      </div>
-
-      {/* Main Grid */}
-      <div className="max-w-7xl mx-auto grid gap-8">
-
-        {activeTab === "home" && (
-          <>
-            <AISuggestions group={group} />
-            <AnalyticsChart group={group} />
-            <BudgetAlerts group={group} />
-            <ActivityTimeline group={group} />
-          </>
-        )}
-
-        {activeTab === "wallet" && (
-          <>
-            <SettlementCalculator group={group} />
-            <MemberContribution group={group} />
-          </>
-        )}
-
-        {activeTab === "expenses" && (
-          <>
-            <ExpenseRequests group={group} />
-            <ExpenseHistory group={group} />
-            <SplitExpense group={group} />
-            <ExportPDF group={group} />
-          </>
-        )}
-
-        {activeTab === "members" && (
-          <>
-            <MemberProfiles group={group} />
-            <InviteByEmail group={group} />
-          </>
-        )}
-
-        {activeTab === "chat" && (
-          <GroupChat group={group} />
-        )}
-
       </div>
 
       {showPaymentModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm overflow-y-auto">
           <div className="min-h-screen flex items-center justify-center p-6">
-            <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-3xl">
-
+            <div className="relative w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-md">
               <button
-                onClick={() =>
-                  setShowPaymentModal(false)
-                }
-                className="absolute top-4 right-4 z-50 bg-white text-black w-12 h-12 rounded-full shadow-xl text-2xl font-bold"
+                onClick={() => setShowPaymentModal(false)}
+                className="absolute top-4 right-4 z-50 bg-[#F8F4EA] text-[#24322E] w-12 h-12 rounded-full shadow-xl text-2xl font-bold"
               >
-                ×
+                x
               </button>
 
               <RealUPIPayment group={group} />
@@ -200,17 +215,115 @@ export default function GroupDetails() {
   );
 }
 
-function TabButton({ label, active, onClick }) {
+function SidebarHeader({ group, metrics, onAddMoney }) {
+  return (
+    <div className="space-y-5">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-[#6b6350]">
+          Goa wallet
+        </p>
+        <h1 className="mt-2 text-3xl font-black tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
+          {group.name}
+        </h1>
+      </div>
+
+      <div className="rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] p-5 shadow-sm">
+        <p className="text-sm font-semibold text-[#6b6350] dark:text-[#a89a6d]">
+          Wallet balance
+        </p>
+        <p className="mt-2 text-5xl font-black tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
+          Rs. {group.walletBalance || 0}
+        </p>
+        <button
+          onClick={onAddMoney}
+          className="mt-5 w-full rounded-md bg-[#B23A2E] hover:bg-[#9a3227] px-4 py-3 font-bold text-[#F8F4EA] shadow-lg transition hover:scale-[1.01] active:scale-[0.99]"
+        >
+          Add Money
+        </button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <SmallPill icon={<ShieldCheck size={16} />} label="Approval" value={group.approvalMode || "free"} />
+        <SmallPill icon={<Users size={16} />} label="Members" value={metrics.members} />
+      </div>
+    </div>
+  );
+}
+
+function MobileHeader({ group, metrics, onAddMoney }) {
+  return (
+    <div className="rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-[#6b6350]">
+            Shared wallet
+          </p>
+          <h1 className="mt-1 text-3xl font-black text-[#24322E] dark:text-[#EFE7D6]">
+            {group.name}
+          </h1>
+        </div>
+        <button
+          onClick={onAddMoney}
+          className="rounded-md bg-[#B23A2E] hover:bg-[#9a3227] px-4 py-3 text-sm font-bold text-[#F8F4EA] shadow-lg"
+        >
+          Add Money
+        </button>
+      </div>
+
+      <div className="mt-5 grid grid-cols-3 gap-3">
+        <MetricCard label="Wallet" value={`Rs. ${group.walletBalance || 0}`} />
+        <MetricCard label="Expenses" value={`Rs. ${metrics.expenses}`} />
+        <MetricCard label="Pending" value={metrics.pendingApprovals} tone="gold" />
+      </div>
+    </div>
+  );
+}
+
+function SmallPill({ icon, label, value }) {
+  return (
+    <div className="rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] p-3">
+      <div className="flex items-center gap-2 text-[#6b6350] dark:text-[#a89a6d]">
+        {icon}
+        <span className="text-xs font-semibold uppercase tracking-wide">{label}</span>
+      </div>
+      <p className="mt-1 text-sm font-black capitalize text-[#24322E] dark:text-[#EFE7D6]">{value}</p>
+    </div>
+  );
+}
+
+function MetricCard({ label, value, tone = "ink" }) {
+  const toneClass =
+    tone === "gold"
+      ? "text-[#D9A441]"
+      : "text-[#24322E] dark:text-[#EFE7D6]";
+
+  return (
+    <div className="rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] p-4 shadow-sm">
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#6b6350] dark:text-[#a89a6d]">
+        {label}
+      </p>
+      <p className={`mt-1 text-2xl font-black tracking-tight ${toneClass}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function TabButton({ icon, label, active, onClick, compact = false }) {
   return (
     <button
       onClick={onClick}
-      className={`min-w-[110px] p-3 rounded-2xl font-bold text-sm transition ${
+      title={label}
+      className={`${compact ? "min-w-0 p-3" : "w-full px-4 py-3 justify-start"} rounded-md font-bold text-sm transition flex items-center justify-center gap-3 ${
         active
-          ? "bg-gradient-to-r from-red-500 to-orange-500 text-white shadow-lg"
-          : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-red-100 dark:border-slate-700"
+          ? "bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] shadow-lg"
+          : "text-[#6b6350] dark:text-[#a89a6d] hover:bg-[#EAE1CC] dark:hover:bg-[#221F1A]"
       }`}
     >
-      {label}
+      {icon}
+      <span className={compact ? "sr-only" : ""}>{label}</span>
     </button>
   );
 }
+
+

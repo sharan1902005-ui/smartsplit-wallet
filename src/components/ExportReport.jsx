@@ -75,21 +75,22 @@ export default function ExportReport({ group }) {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
-      <h2 className="text-3xl font-bold text-red-600 mb-4">
+    <div className="bg-[#F8F4EA] rounded-md shadow-xl border border-[#C7B98F] p-8">
+      <h2 className="text-3xl font-bold text-[#B23A2E] mb-4">
         Export Reports
       </h2>
 
-      <p className="text-slate-500 mb-6">
+      <p className="text-[#6b6350] mb-6">
         Download complete expense summary PDF
       </p>
 
       <button
         onClick={generatePDF}
-        className="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white p-4 rounded-2xl font-bold"
+        className="w-full bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] p-4 rounded-md font-bold"
       >
         Download Expense Report PDF
       </button>
     </div>
   );
 }
+

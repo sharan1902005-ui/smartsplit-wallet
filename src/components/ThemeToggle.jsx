@@ -1,4 +1,4 @@
-import { Moon, Sun } from "lucide-react";
+﻿import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 export default function ThemeToggle() {
@@ -7,13 +7,14 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setDarkMode(!darkMode)}
-      className="fixed top-6 right-6 z-50 bg-white dark:bg-slate-800 shadow-xl border border-red-100 dark:border-slate-700 rounded-full p-4 transition"
+      className="fixed top-6 right-6 z-50 bg-[#F8F4EA] dark:bg-[#221F1A] shadow-xl border border-[#C7B98F] dark:border-[#3a352b] rounded-full p-4 transition"
     >
       {darkMode ? (
-        <Sun className="text-yellow-400" />
+        <Sun className="text-[#D9A441]" />
       ) : (
-        <Moon className="text-slate-700" />
+        <Moon className="text-[#24322E]" />
       )}
     </button>
   );
 }
+

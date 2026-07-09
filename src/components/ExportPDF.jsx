@@ -47,21 +47,21 @@ export default function ExportPDF({ group }) {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl border border-red-100 p-8">
+    <div className="bg-[#F8F4EA] rounded-md shadow-xl border border-[#C7B98F] p-8">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-red-600">
+          <h2 className="text-2xl font-bold text-[#B23A2E]">
             Export Reports
           </h2>
 
-          <p className="text-slate-500 mt-2">
+          <p className="text-[#6b6350] mt-2">
             Download complete expense report PDF
           </p>
         </div>
 
         <button
           onClick={generatePDF}
-          className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-4 rounded-2xl font-bold shadow-xl flex items-center gap-2"
+          className="bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] px-6 py-4 rounded-md font-bold shadow-xl flex items-center gap-2"
         >
           <FileDown size={20} />
           Download PDF
@@ -70,3 +70,4 @@ export default function ExportPDF({ group }) {
     </div>
   );
 }
+

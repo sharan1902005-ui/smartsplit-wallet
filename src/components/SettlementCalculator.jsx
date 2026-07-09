@@ -1,4 +1,5 @@
 import { Calculator } from "lucide-react";
+import { getMemberName } from "../utils/memberDisplay";
 
 export default function SettlementCalculator({
   group,
@@ -12,48 +13,48 @@ export default function SettlementCalculator({
 
   if (members.length <= 1) {
     return (
-      <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8 border border-red-100 dark:border-slate-700">
+      <section className="rounded-md border border-[#C7B98F] bg-[#F8F4EA] p-6 shadow-sm dark:border-[#3a352b] dark:bg-[#221F1A]">
         <div className="flex items-center gap-4 mb-6">
-          <Calculator className="text-red-500" />
-          <h2 className="text-3xl font-black text-red-600">
+          <Calculator className="text-[#B23A2E]" />
+          <h2 className="font-['Big_Shoulders_Display'] text-3xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
             Settlement Calculator
           </h2>
         </div>
 
-        <div className="bg-[#fff8f2] dark:bg-slate-900 rounded-2xl p-6 text-center">
-          <p className="text-slate-600 dark:text-slate-300 text-lg font-semibold">
+        <div className="bg-[#EAE1CC] dark:bg-[#171512] rounded-md border border-[#C7B98F] dark:border-[#3a352b] p-6 text-center">
+          <p className="text-[#6b6350] dark:text-[#a89a6d] text-lg font-semibold">
             No settlements needed.
           </p>
 
-          <p className="text-slate-400 mt-2">
+          <p className="text-[#a89a6d] mt-2">
             Add more members to split balances.
           </p>
         </div>
-      </div>
+      </section>
     );
   }
 
   const contributions = {};
 
   members.forEach((member) => {
-    contributions[member.email] = {
-      name:
-        member.name ||
-        member.email ||
-        "Member",
+    const key = member.uid || member.email || getMemberName(member);
+
+    contributions[key] = {
+      name: getMemberName(member),
       total: 0,
     };
   });
 
   deposits.forEach((txn) => {
     const key =
-      txn.userName ||
       txn.userId ||
+      txn.user ||
+      txn.userName ||
       "Unknown";
 
     if (!contributions[key]) {
       contributions[key] = {
-        name: key,
+        name: getMemberName({ name: txn.userName || key }),
         total: 0,
       };
     }
@@ -126,25 +127,30 @@ export default function SettlementCalculator({
   });
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl p-8 border border-red-100 dark:border-slate-700">
+    <section className="rounded-md border border-[#C7B98F] bg-[#F8F4EA] p-6 shadow-sm dark:border-[#3a352b] dark:bg-[#221F1A]">
       <div className="flex items-center gap-4 mb-6">
-        <Calculator className="text-red-500" />
-        <h2 className="text-3xl font-black text-red-600">
+        <Calculator className="text-[#B23A2E]" />
+        <h2 className="font-['Big_Shoulders_Display'] text-3xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
           Settlement Calculator
         </h2>
       </div>
 
-      <div className="bg-[#fff8f2] dark:bg-slate-900 rounded-2xl p-6 mb-6">
-        <p className="text-slate-600">
+      <div className="relative border-t-2 border-dashed border-[#C7B98F] dark:border-[#3a352b] my-5">
+        <div className="absolute -left-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
+        <div className="absolute -right-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
+      </div>
+
+      <div className="bg-[#EAE1CC] dark:bg-[#171512] rounded-md border border-[#C7B98F] dark:border-[#3a352b] p-6 mb-6 grid gap-3 sm:grid-cols-2">
+        <p className="text-[#6b6350] dark:text-[#a89a6d]">
           Total contributed:
-          <span className="font-bold text-red-500 ml-2">
+          <span className="font-['IBM_Plex_Mono'] font-bold text-[#B23A2E] ml-2">
             ₹{totalContributed}
           </span>
         </p>
 
-        <p className="text-slate-600 mt-2">
+        <p className="text-[#6b6350] dark:text-[#a89a6d] mt-2">
           Fair share per member:
-          <span className="font-bold text-orange-500 ml-2">
+          <span className="font-['IBM_Plex_Mono'] font-bold text-[#D9A441] ml-2">
             ₹
             {Math.round(
               fairShare
@@ -154,8 +160,8 @@ export default function SettlementCalculator({
       </div>
 
       {settlements.length === 0 ? (
-        <div className="bg-green-50 rounded-2xl p-6 text-center">
-          <p className="font-semibold text-green-700">
+        <div className="bg-[#EAE1CC] dark:bg-[#171512] rounded-md border border-[#3F6B4F] p-6 text-center">
+          <p className="font-semibold text-[#3F6B4F]">
             Everyone is settled.
           </p>
         </div>
@@ -168,7 +174,7 @@ export default function SettlementCalculator({
             ) => (
               <div
                 key={index}
-                className="bg-[#fff8f2] rounded-2xl p-5 border border-red-100"
+                className="bg-[#EAE1CC] dark:bg-[#171512] rounded-md p-5 border border-[#C7B98F] dark:border-[#3a352b]"
               >
                 <p className="font-semibold">
                   {
@@ -180,7 +186,7 @@ export default function SettlementCalculator({
                   }
                 </p>
 
-                <p className="text-red-500 font-black text-xl mt-2">
+                <p className="text-[#B23A2E] font-['IBM_Plex_Mono'] font-black text-xl mt-2">
                   ₹
                   {
                     settlement.amount
@@ -191,6 +197,7 @@ export default function SettlementCalculator({
           )}
         </div>
       )}
-    </div>
+    </section>
   );
 }
+

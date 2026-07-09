@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../firebase/config";
 import { useNavigate } from "react-router-dom";
+import { Ticket, Plane } from "lucide-react";
+import { cleanDisplayName } from "../utils/memberDisplay";
 
 export default function JoinGroup() {
   const [inviteCode, setInviteCode] = useState("");
@@ -37,8 +39,7 @@ export default function JoinGroup() {
         members: arrayUnion({
           uid: auth.currentUser.uid,
           name:
-            auth.currentUser.displayName ||
-            "User",
+            cleanDisplayName(auth.currentUser.displayName, "User"),
           email:
             auth.currentUser.email || "",
           photo:
@@ -55,27 +56,35 @@ export default function JoinGroup() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex justify-center items-center px-4">
-      <div className="bg-slate-900 p-10 rounded-3xl shadow-2xl w-full max-w-md">
-        <h1 className="text-white text-4xl font-bold mb-8">
-          Join Group
+    <div className="min-h-screen bg-[#EAE1CC] dark:bg-[#171512] flex justify-center items-center px-4">
+      <div className="bg-[#F8F4EA] dark:bg-[#221F1A] backdrop-blur-xl border border-[#C7B98F] dark:border-[#3a352b] p-10 rounded-md w-full max-w-md shadow-2xl">
+        <div className="flex items-center gap-3 mb-2 text-sm font-semibold text-[#B23A2E] uppercase tracking-widest">
+          <Ticket size={16} /> Redeem ticket
+        </div>
+
+        <h1 className="text-4xl font-black text-[#24322E] dark:text-[#EFE7D6] mb-8">
+          Join group
         </h1>
 
+        <label className="block text-sm font-semibold text-[#6b6350] dark:text-[#a89a6d] mb-2">
+          Invite code
+        </label>
         <input
           type="text"
-          placeholder="Enter Invite Code"
+          placeholder="e.g. 7F3K2L"
           value={inviteCode}
           onChange={(e) => setInviteCode(e.target.value)}
-          className="w-full p-4 rounded-xl bg-slate-800 text-white mb-6"
+          className="w-full p-4 rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] text-[#24322E] dark:text-[#EFE7D6] tracking-[0.3em] uppercase text-center text-lg mb-6"
         />
 
         <button
           onClick={handleJoinGroup}
-          className="w-full bg-green-600 hover:bg-green-500 p-4 rounded-xl text-white"
+          className="w-full bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] p-4 rounded-md font-bold text-lg shadow-xl flex items-center justify-center gap-2 hover:scale-[1.01] transition"
         >
-          Join Wallet
+          <Plane size={18} /> Board this wallet
         </button>
       </div>
     </div>
   );
 }
+

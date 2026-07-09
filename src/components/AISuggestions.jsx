@@ -1,3 +1,5 @@
+import { CheckCircle, Info, Lightbulb, TriangleAlert } from "lucide-react";
+
 export default function AISuggestions({ group }) {
   const transactions = group.transactions || [];
 
@@ -16,17 +18,20 @@ export default function AISuggestions({ group }) {
 
   const suggestions = [];
 
-  // Wallet low
   if (group.walletBalance < 1000 && totalDeposits > 0) {
-    suggestions.push("⚠️ Wallet balance is running low.");
+    suggestions.push({
+      tone: "warning",
+      text: "Wallet balance is running low.",
+    });
   }
 
-  // High spending
   if (totalDeposits > 0 && totalExpenses / totalDeposits > 0.7) {
-    suggestions.push("💸 More than 70% of funds have been spent.");
+    suggestions.push({
+      tone: "warning",
+      text: "More than 70% of funds have been spent.",
+    });
   }
 
-  // Top contributor dominance
   const contributionMap = {};
 
   deposits.forEach((d) => {
@@ -43,50 +48,90 @@ export default function AISuggestions({ group }) {
     totalDeposits > 0 &&
     maxContribution / totalDeposits > 0.6
   ) {
-    suggestions.push(
-      "👤 One member contributed more than 60% of the wallet."
-    );
+    suggestions.push({
+      tone: "info",
+      text: "One member contributed more than 60% of the wallet.",
+    });
   }
 
-  // Expense title analysis
   const foodExpenses = expenses.filter((e) =>
     e.title?.toLowerCase().includes("food")
   );
 
   if (foodExpenses.length >= 2) {
-    suggestions.push("🍔 Food seems to be a frequent expense.");
+    suggestions.push({
+      tone: "info",
+      text: "Food seems to be a frequent expense.",
+    });
   }
 
-  // Approval suggestion
   if (
     group.approvalMode === "free" &&
     totalExpenses > 3000
   ) {
-    suggestions.push(
-      "🔐 Consider switching to approval mode for better control."
-    );
+    suggestions.push({
+      tone: "info",
+      text: "Consider switching to approval mode for better control.",
+    });
   }
 
   if (suggestions.length === 0) {
-    suggestions.push("✅ Spending looks healthy.");
+    suggestions.push({
+      tone: "healthy",
+      text: "Spending looks healthy.",
+    });
   }
 
   return (
-    <div className="bg-slate-900 rounded-3xl p-8 shadow-xl mt-10">
-      <h2 className="text-3xl font-bold mb-6">
-        AI Smart Suggestions
-      </h2>
+    <section className="rounded-md border border-[#C7B98F] bg-[#F8F4EA] p-6 shadow-sm dark:border-[#3a352b] dark:bg-[#221F1A]">
+      <div className="mb-5 flex items-center gap-3">
+        <div className="rounded-md border border-[#D9A441] bg-[#EAE1CC] p-3 text-[#D9A441] dark:bg-[#171512]">
+          <Lightbulb size={22} />
+        </div>
+        <div>
+          <h2 className="font-['Big_Shoulders_Display'] text-3xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
+            AI Smart Suggestions
+          </h2>
+          <p className="text-sm text-[#6b6350] dark:text-[#a89a6d]">
+            Practical prompts based on wallet activity
+          </p>
+        </div>
+      </div>
 
-      <div className="space-y-4">
+      <div className="relative border-t-2 border-dashed border-[#C7B98F] dark:border-[#3a352b] my-5">
+        <div className="absolute -left-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
+        <div className="absolute -right-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {suggestions.map((tip, index) => (
-          <div
-            key={index}
-            className="bg-slate-800 p-5 rounded-2xl"
-          >
-            {tip}
-          </div>
+          <SuggestionCard key={index} tip={tip} />
         ))}
       </div>
+    </section>
+  );
+}
+
+function SuggestionCard({ tip }) {
+  const styles = {
+    warning: {
+      card: "border-[#D9A441] bg-[#EAE1CC] text-[#24322E] dark:bg-[#171512] dark:text-[#EFE7D6]",
+      icon: <TriangleAlert size={18} />,
+    },
+    info: {
+      card: "border-[#C7B98F] bg-[#F8F4EA] text-[#24322E] dark:border-[#3a352b] dark:bg-[#221F1A] dark:text-[#EFE7D6]",
+      icon: <Info size={18} />,
+    },
+    healthy: {
+      card: "border-[#3F6B4F] bg-[#EAE1CC] text-[#24322E] dark:bg-[#171512] dark:text-[#EFE7D6]",
+      icon: <CheckCircle size={18} />,
+    },
+  }[tip.tone];
+
+  return (
+    <div className={`flex gap-3 rounded-md border p-4 ${styles.card}`}>
+      <div className="mt-0.5 shrink-0">{styles.icon}</div>
+      <p className="text-sm font-semibold leading-relaxed">{tip.text}</p>
     </div>
   );
 }

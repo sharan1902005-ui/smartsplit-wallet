@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { db } from '../firebase/config'
-import { doc, updateDoc, arrayUnion, Timestamp } from 'firebase/firestore'
+import { doc } from 'firebase/firestore'
 import { FiX } from 'react-icons/fi'
+import { getMemberName } from '../utils/memberDisplay'
+import { submitExpense } from '../utils/expenseWorkflow'
 
 export default function ExpenseModal({ group, currentUser, onClose }) {
   const [form, setForm] = useState({
@@ -25,17 +27,20 @@ export default function ExpenseModal({ group, currentUser, onClose }) {
     e.preventDefault()
     if (!form.description || !form.amount || form.splitAmong.length === 0) return
     setLoading(true)
-    const expense = {
-      id: Date.now().toString(),
-      description: form.description,
-      amount: parseFloat(form.amount),
-      paidBy: form.paidBy,
-      splitAmong: form.splitAmong,
-      createdAt: Timestamp.now(),
-    }
-    await updateDoc(doc(db, 'groups', group.id), {
-      expenses: arrayUnion(expense),
-    })
+    await submitExpense(
+      doc(db, 'groups', group.id),
+      group,
+      {
+        title: form.description,
+        description: form.description,
+        amount: parseFloat(form.amount),
+        category: 'Other',
+        paidBy: form.paidBy,
+        splitMembers: form.splitAmong,
+        source: 'expense-modal',
+      },
+      currentUser
+    )
     setLoading(false)
     onClose()
   }
@@ -66,7 +71,7 @@ export default function ExpenseModal({ group, currentUser, onClose }) {
           <label>Paid by</label>
           <select value={form.paidBy} onChange={(e) => setForm({ ...form, paidBy: e.target.value })}>
             {group.members.map((m) => (
-              <option key={m.uid} value={m.uid}>{m.displayName}</option>
+              <option key={m.uid} value={m.uid}>{getMemberName(m)}</option>
             ))}
           </select>
           <label>Split among</label>
@@ -78,7 +83,7 @@ export default function ExpenseModal({ group, currentUser, onClose }) {
                   checked={form.splitAmong.includes(m.uid)}
                   onChange={() => toggleMember(m.uid)}
                 />
-                {m.displayName}
+                {getMemberName(m)}
               </label>
             ))}
           </div>

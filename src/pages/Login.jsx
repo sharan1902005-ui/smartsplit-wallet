@@ -1,4 +1,4 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import {
   signInWithPopup,
   signInWithEmailAndPassword,
@@ -9,6 +9,7 @@ import { auth, db } from "../firebase/config";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { Wallet, ShieldCheck, Sparkles } from "lucide-react";
+import { cleanDisplayName } from "../utils/memberDisplay";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function Login() {
       const user = result.user;
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
-        name: user.displayName || "User",
+        name: cleanDisplayName(user.displayName, "User"),
         email: user.email || "",
         photo: user.photoURL || "",
       }, { merge: true });
@@ -56,7 +57,7 @@ export default function Login() {
       const user = result.user;
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
-        name: user.displayName || email.split("@")[0],
+        name: cleanDisplayName(user.displayName || email.split("@")[0], "User"),
         email: user.email || "",
         photo: user.photoURL || "",
       }, { merge: true });
@@ -69,63 +70,63 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#fff8e7] via-[#fff3d4] to-[#ffe7dc] dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 flex">
+    <div className="min-h-screen bg-[#EAE1CC] dark:bg-[#171512] flex">
       
       {/* LEFT PREMIUM SIDE */}
       <div className="hidden md:flex w-1/2 relative px-16 py-14 flex-col justify-between overflow-hidden">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-red-200 rounded-full blur-3xl opacity-50"></div>
-        <div className="absolute bottom-10 right-10 w-72 h-72 bg-yellow-200 rounded-full blur-3xl opacity-60"></div>
+        <div className="absolute top-10 left-10 w-72 h-72 bg-[#C7B98F] rounded-full blur-3xl opacity-50"></div>
+        <div className="absolute bottom-10 right-10 w-72 h-72 bg-[#D9A441] rounded-full blur-3xl opacity-60"></div>
 
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-8">
-            <div className="bg-red-500 text-white p-4 rounded-3xl shadow-xl">
+            <div className="bg-[#B23A2E] text-[#F8F4EA] p-4 rounded-md shadow-xl">
               <Wallet size={34} />
             </div>
 
             <div>
-              <h1 className="text-5xl font-black text-slate-900 dark:text-white">
+              <h1 className="text-5xl font-black text-[#24322E] dark:text-[#EFE7D6]">
                 SmartSplit
               </h1>
-              <p className="text-slate-600 mt-2">
+              <p className="text-[#6b6350] mt-2">
                 Premium shared wallet experience
               </p>
             </div>
           </div>
 
-          <h2 className="text-6xl font-black text-slate-900 dark:text-white leading-tight">
+          <h2 className="text-6xl font-black text-[#24322E] dark:text-[#EFE7D6] leading-tight">
             Split expenses.
             <br />
             Travel smarter.
           </h2>
 
-          <p className="text-xl text-slate-600 mt-6 leading-relaxed max-w-xl">
+          <p className="text-xl text-[#6b6350] mt-6 leading-relaxed max-w-xl">
             Manage group trips, roommates, team wallets, and shared spending
             with real-time tracking, payments, analytics, and AI insights.
           </p>
         </div>
 
-        <div className="relative z-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-red-100 dark:border-slate-700 rounded-3xl p-8 shadow-2xl">
+        <div className="relative z-10 bg-[#F8F4EA]/80 dark:bg-[#221F1A]/80 backdrop-blur-xl border border-[#C7B98F] dark:border-[#3a352b] rounded-md p-8 shadow-2xl">
           <div className="flex items-center gap-3 mb-6">
-            <Sparkles className="text-red-500" />
-            <span className="font-semibold text-slate-800">
+            <Sparkles className="text-[#B23A2E]" />
+            <span className="font-semibold text-[#24322E]">
               Live wallet insights
             </span>
           </div>
 
           <div className="space-y-4">
-            <div className="flex justify-between bg-red-50 rounded-2xl p-4">
-              <span className="text-slate-600">Trip Wallet</span>
-              <span className="font-bold text-red-600">₹12,450</span>
+            <div className="flex justify-between bg-[#EAE1CC] rounded-md p-4">
+              <span className="text-[#6b6350]">Trip Wallet</span>
+              <span className="font-bold text-[#B23A2E]">{"\u20B9"}12,450</span>
             </div>
 
-            <div className="flex justify-between bg-yellow-50 rounded-2xl p-4">
-              <span className="text-slate-600">Food Split</span>
-              <span className="font-bold text-orange-500">₹2,150</span>
+            <div className="flex justify-between bg-[#EAE1CC] rounded-md p-4">
+              <span className="text-[#6b6350]">Food Split</span>
+              <span className="font-bold text-[#D9A441]">{"\u20B9"}2,150</span>
             </div>
 
-            <div className="flex justify-between bg-orange-50 rounded-2xl p-4">
-              <span className="text-slate-600">Fuel</span>
-              <span className="font-bold text-red-500">₹950</span>
+            <div className="flex justify-between bg-[#EAE1CC] rounded-md p-4">
+              <span className="text-[#6b6350]">Fuel</span>
+              <span className="font-bold text-[#B23A2E]">{"\u20B9"}950</span>
             </div>
           </div>
         </div>
@@ -133,21 +134,21 @@ export default function Login() {
 
       {/* RIGHT LOGIN */}
       <div className="w-full md:w-1/2 flex items-center justify-center px-8">
-        <div className="w-full max-w-md bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-red-100 dark:border-slate-700 rounded-3xl shadow-2xl p-10">
+        <div className="w-full max-w-md bg-[#F8F4EA] dark:bg-[#221F1A] backdrop-blur-xl border border-[#C7B98F] dark:border-[#3a352b] rounded-md shadow-2xl p-10">
 
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-4">
-              <ShieldCheck className="text-red-500" />
-              <span className="text-sm font-semibold text-red-500 uppercase tracking-widest">
+              <ShieldCheck className="text-[#B23A2E]" />
+              <span className="text-sm font-semibold text-[#B23A2E] uppercase tracking-widest">
                 Secure Login
               </span>
             </div>
 
-            <h2 className="text-4xl font-black text-slate-900 dark:text-white">
+            <h2 className="text-4xl font-black text-[#24322E] dark:text-[#EFE7D6]">
               {isSignup ? "Create account" : "Welcome back"}
             </h2>
 
-            <p className="text-slate-500 dark:text-slate-400 mt-3 text-lg">
+            <p className="text-[#6b6350] dark:text-[#a89a6d] mt-3 text-lg">
               {isSignup
                 ? "Start your SmartSplit journey."
                 : "Sign in to continue managing expenses."}
@@ -160,7 +161,7 @@ export default function Login() {
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-5 py-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-[#fffdf8] dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-200"
+              className="w-full px-5 py-4 rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] text-[#24322E] dark:text-[#EFE7D6] focus:outline-none focus:ring-2 focus:ring-[#B23A2E]/20"
             />
 
             <input
@@ -168,13 +169,13 @@ export default function Login() {
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-5 py-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-[#fffdf8] dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-200"
+              className="w-full px-5 py-4 rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] text-[#24322E] dark:text-[#EFE7D6] focus:outline-none focus:ring-2 focus:ring-[#B23A2E]/20"
             />
 
             <button
               onClick={handleAuth}
               disabled={loading}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold shadow-xl hover:scale-[1.02] transition"
+              className="w-full py-4 rounded-md bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] font-bold shadow-xl hover:scale-[1.02] transition"
             >
               {loading
                 ? "Please wait..."
@@ -184,20 +185,20 @@ export default function Login() {
             </button>
 
             <div className="flex items-center gap-4 py-2">
-              <div className="flex-1 h-px bg-red-100"></div>
-              <span className="text-slate-400 text-sm">OR</span>
-              <div className="flex-1 h-px bg-red-100"></div>
+              <div className="flex-1 h-px bg-[#C7B98F]"></div>
+              <span className="text-[#a89a6d] text-sm">OR</span>
+              <div className="flex-1 h-px bg-[#C7B98F]"></div>
             </div>
 
             <button
               onClick={signInWithGoogle}
               disabled={loading}
-              className="w-full py-4 rounded-2xl border border-red-100 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold hover:bg-red-50 dark:hover:bg-slate-700 transition shadow-sm"
+              className="w-full py-4 rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] text-[#24322E] dark:text-[#EFE7D6] font-semibold hover:bg-[#EAE1CC] dark:hover:bg-[#3a352b] transition shadow-sm"
             >
               Continue with Google
             </button>
 
-            <p className="text-center text-slate-500 pt-4">
+            <p className="text-center text-[#6b6350] pt-4">
               {isSignup
                 ? "Already have an account?"
                 : "New to SmartSplit?"}
@@ -205,7 +206,7 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setIsSignup(!isSignup)}
-                className="ml-2 text-red-500 font-semibold hover:underline"
+                className="ml-2 text-[#B23A2E] font-semibold hover:underline"
               >
                 {isSignup ? "Login" : "Create account"}
               </button>
@@ -216,3 +217,5 @@ export default function Login() {
     </div>
   );
 }
+
+

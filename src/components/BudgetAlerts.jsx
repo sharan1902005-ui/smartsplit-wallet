@@ -84,41 +84,51 @@ export default function BudgetAlerts({ group }) {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
-      <h2 className="text-3xl font-bold text-red-600 mb-6">
-        Smart Budget Alerts
-      </h2>
+    <section className="rounded-md border border-[#C7B98F] bg-[#F8F4EA] p-6 shadow-sm dark:border-[#3a352b] dark:bg-[#221F1A]">
+      <div className="mb-5">
+        <h2 className="font-['Big_Shoulders_Display'] text-3xl font-extrabold uppercase tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
+          Smart Budget Alerts
+        </h2>
+        <p className="text-sm text-[#6b6350] dark:text-[#a89a6d]">
+          Budget health and spending warnings
+        </p>
+      </div>
 
-      <div className="space-y-4">
+      <div className="relative border-t-2 border-dashed border-[#C7B98F] dark:border-[#3a352b] my-5">
+        <div className="absolute -left-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
+        <div className="absolute -right-9 -top-3 w-6 h-6 rounded-full bg-[#EAE1CC] dark:bg-[#171512]" />
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
         {alerts.map((alert, index) => (
           <div
             key={index}
-            className={`rounded-2xl p-5 flex gap-4 items-start border ${
+            className={`rounded-md p-5 flex gap-4 items-start border ${
               alert.type === "warning"
-                ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800"
-                : "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+                ? "bg-[#EAE1CC] dark:bg-[#171512] border-[#D9A441]"
+                : "bg-[#EAE1CC] dark:bg-[#171512] border-[#3F6B4F]"
             }`}
           >
             <div>
               {alert.type === "warning" ? (
-                <AlertTriangle className="text-yellow-600" />
+                <AlertTriangle className="text-[#D9A441]" />
               ) : (
-                <CheckCircle className="text-green-600" />
+                <CheckCircle className="text-[#3F6B4F]" />
               )}
             </div>
 
             <div>
-              <h3 className="font-bold text-slate-900 dark:text-white">
+              <h3 className="font-bold text-[#24322E] dark:text-[#EFE7D6]">
                 {alert.title}
               </h3>
 
-              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+              <p className="text-[#6b6350] dark:text-[#a89a6d] text-sm mt-1">
                 {alert.message}
               </p>
             </div>
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

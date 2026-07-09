@@ -1,4 +1,4 @@
-import {
+﻿import {
   doc,
   updateDoc,
 } from "firebase/firestore";
@@ -70,7 +70,7 @@ export default function DepositApproval({
           text: `${
             auth.currentUser.displayName ||
             auth.currentUser.email
-          } approved ₹${deposit.amount} deposit from ${
+          } approved \u20B9${deposit.amount} deposit from ${
             deposit.userName
           }`,
           createdAt:
@@ -106,7 +106,7 @@ export default function DepositApproval({
           text: `${
             auth.currentUser.displayName ||
             auth.currentUser.email
-          } rejected ₹${deposit.amount} deposit from ${
+          } rejected \u20B9${deposit.amount} deposit from ${
             deposit.userName
           }`,
           createdAt:
@@ -118,24 +118,24 @@ export default function DepositApproval({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-red-100 dark:border-slate-700 p-8">
+    <div className="bg-[#F8F4EA] dark:bg-[#221F1A] rounded-md shadow-xl border border-[#C7B98F] dark:border-[#3a352b] p-8">
       <div className="flex items-center gap-4 mb-6">
-        <div className="bg-red-500 text-white p-4 rounded-2xl">
+        <div className="bg-[#B23A2E] text-[#F8F4EA] p-4 rounded-md">
           <Wallet size={22} />
         </div>
 
         <div>
-          <h2 className="text-3xl font-black text-slate-900 dark:text-white">
+          <h2 className="text-3xl font-black text-[#24322E] dark:text-[#EFE7D6]">
             Deposit Approvals
           </h2>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-[#6b6350] dark:text-[#a89a6d]">
             Verify payments before wallet update
           </p>
         </div>
       </div>
 
       {pendingDeposits.length === 0 ? (
-        <p className="text-slate-500">
+        <p className="text-[#6b6350]">
           No pending deposits
         </p>
       ) : (
@@ -144,20 +144,20 @@ export default function DepositApproval({
             (deposit, index) => (
               <div
                 key={index}
-                className="bg-[#fff8f2] dark:bg-slate-800 border border-red-100 dark:border-slate-700 rounded-2xl p-5 flex justify-between items-center"
+                className="bg-[#F8F4EA] dark:bg-[#221F1A] border border-[#C7B98F] dark:border-[#3a352b] rounded-md p-5 flex justify-between items-center"
               >
                 <div>
                   <h3 className="font-bold text-lg">
                     {deposit.userName}
                   </h3>
 
-                  <p className="text-red-500 font-black text-xl">
-                    ₹{deposit.amount}
+                  <p className="text-[#B23A2E] font-black text-xl">
+                    {"\u20B9"}{deposit.amount}
                   </p>
 
-                  <p className="text-sm text-slate-500 mt-2">
+                  <p className="text-sm text-[#6b6350] mt-2">
                     UTR:
-                    <span className="font-bold ml-2 text-slate-800">
+                    <span className="font-bold ml-2 text-[#24322E]">
                       {deposit.utr || "No UTR"}
                     </span>
                   </p>
@@ -170,7 +170,7 @@ export default function DepositApproval({
                         deposit
                       )
                     }
-                    className="bg-green-600 text-white px-4 py-3 rounded-2xl"
+                    className="bg-[#3F6B4F] text-[#F8F4EA] px-4 py-3 rounded-md"
                   >
                     <CheckCircle />
                   </button>
@@ -181,7 +181,7 @@ export default function DepositApproval({
                         deposit
                       )
                     }
-                    className="bg-red-600 text-white px-4 py-3 rounded-2xl"
+                    className="bg-[#B23A2E] text-[#F8F4EA] px-4 py-3 rounded-md"
                   >
                     <XCircle />
                   </button>
@@ -194,3 +194,5 @@ export default function DepositApproval({
     </div>
   );
 }
+
+

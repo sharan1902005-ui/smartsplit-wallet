@@ -63,10 +63,10 @@ export default function RazorpayPayment({ group }) {
   };
 
   return (
-    <div className="bg-slate-900 rounded-3xl p-8 shadow-xl mt-10">
+    <div className="bg-[#F8F4EA] dark:bg-[#221F1A] border border-[#C7B98F] dark:border-[#3a352b] rounded-md p-8 shadow-xl mt-10">
       <button
         onClick={handlePayment}
-        className="w-full bg-green-600 hover:bg-green-500 p-4 rounded-xl"
+        className="w-full bg-[#3F6B4F] text-[#F8F4EA] p-4 rounded-md"
       >
         Pay via UPI / Razorpay
       </button>
