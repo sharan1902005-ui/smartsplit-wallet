@@ -9,6 +9,7 @@ import {
   Wallet,
 } from "lucide-react";
 import heroImage from "../assets/hero.png";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -44,7 +45,7 @@ export default function Landing() {
             </span>
           </Link>
 
-          <div className="flex items-center gap-3 pr-16 md:pr-20">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => navigate("/join-group")}
               className="hidden sm:flex items-center gap-2 bg-[#F8F4EA] dark:bg-[#221F1A] border border-[#C7B98F] dark:border-[#3a352b] px-4 py-3 rounded-md shadow font-semibold"
@@ -58,6 +59,7 @@ export default function Landing() {
             >
               Login
             </button>
+            <ThemeToggle />
           </div>
         </nav>
 

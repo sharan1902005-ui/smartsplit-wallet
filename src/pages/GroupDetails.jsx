@@ -29,6 +29,7 @@ import ExpenseRequests from "../components/ExpenseRequests";
 import ExpenseHistory from "../components/ExpenseHistory";
 import RealUPIPayment from "../components/RealUPIPayment";
 import GroupChat from "../components/GroupChat";
+import ThemeToggle from "../components/ThemeToggle";
 import { normalizeMemberRecord } from "../utils/memberDisplay";
 
 const tabs = [
@@ -218,13 +219,16 @@ export default function GroupDetails() {
 function SidebarHeader({ group, metrics, onAddMoney }) {
   return (
     <div className="space-y-5">
-      <div>
+      <div className="flex items-start justify-between gap-3">
+        <div>
         <p className="text-xs font-bold uppercase tracking-widest text-[#6b6350]">
           Goa wallet
         </p>
         <h1 className="mt-2 text-3xl font-black tracking-tight text-[#24322E] dark:text-[#EFE7D6]">
           {group.name}
         </h1>
+        </div>
+        <ThemeToggle />
       </div>
 
       <div className="rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] p-5 shadow-sm">
@@ -262,12 +266,15 @@ function MobileHeader({ group, metrics, onAddMoney }) {
             {group.name}
           </h1>
         </div>
-        <button
-          onClick={onAddMoney}
-          className="rounded-md bg-[#B23A2E] hover:bg-[#9a3227] px-4 py-3 text-sm font-bold text-[#F8F4EA] shadow-lg"
-        >
-          Add Money
-        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={onAddMoney}
+            className="rounded-md bg-[#B23A2E] hover:bg-[#9a3227] px-4 py-3 text-sm font-bold text-[#F8F4EA] shadow-lg"
+          >
+            Add Money
+          </button>
+          <ThemeToggle />
+        </div>
       </div>
 
       <div className="mt-5 grid grid-cols-3 gap-3">

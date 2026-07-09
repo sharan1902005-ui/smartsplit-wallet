@@ -12,6 +12,7 @@ import { db, auth } from "../firebase/config";
 import { useNavigate } from "react-router-dom";
 import { Ticket, Plane } from "lucide-react";
 import { cleanDisplayName } from "../utils/memberDisplay";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function JoinGroup() {
   const [inviteCode, setInviteCode] = useState("");
@@ -58,13 +59,18 @@ export default function JoinGroup() {
   return (
     <div className="min-h-screen bg-[#EAE1CC] dark:bg-[#171512] flex justify-center items-center px-4">
       <div className="bg-[#F8F4EA] dark:bg-[#221F1A] backdrop-blur-xl border border-[#C7B98F] dark:border-[#3a352b] p-10 rounded-md w-full max-w-md shadow-2xl">
-        <div className="flex items-center gap-3 mb-2 text-sm font-semibold text-[#B23A2E] uppercase tracking-widest">
-          <Ticket size={16} /> Redeem ticket
-        </div>
+        <div className="flex items-start justify-between gap-4 mb-8">
+          <div>
+            <div className="flex items-center gap-3 text-sm font-semibold text-[#B23A2E] uppercase tracking-widest">
+              <Ticket size={16} /> Redeem ticket
+            </div>
 
-        <h1 className="text-4xl font-black text-[#24322E] dark:text-[#EFE7D6] mb-8">
-          Join group
-        </h1>
+            <h1 className="text-4xl font-black text-[#24322E] dark:text-[#EFE7D6] mt-2">
+              Join group
+            </h1>
+          </div>
+          <ThemeToggle />
+        </div>
 
         <label className="block text-sm font-semibold text-[#6b6350] dark:text-[#a89a6d] mb-2">
           Invite code

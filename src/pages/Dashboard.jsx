@@ -22,6 +22,7 @@ import {
   Plane,
 } from "lucide-react";
 import AnalyticsChart from "../components/AnalyticsChart";
+import ThemeToggle from "../components/ThemeToggle";
 import { submitExpense } from "../utils/expenseWorkflow";
 
 export default function Dashboard() {
@@ -137,7 +138,7 @@ export default function Dashboard() {
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 sm:gap-4">
             <img
               src={user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || "User")}&background=B23A2E&color=fff`}
               onError={(e) => {
@@ -153,6 +154,7 @@ export default function Dashboard() {
             >
               <LogOut size={18} /> Log out
             </button>
+            <ThemeToggle />
           </div>
         </div>
 

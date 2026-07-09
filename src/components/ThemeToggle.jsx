@@ -1,18 +1,20 @@
 ﻿import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
-export default function ThemeToggle() {
+export default function ThemeToggle({ className = "" }) {
   const { darkMode, setDarkMode } = useTheme();
 
   return (
     <button
+      type="button"
       onClick={() => setDarkMode(!darkMode)}
-      className="fixed top-6 right-6 z-50 bg-[#F8F4EA] dark:bg-[#221F1A] shadow-xl border border-[#C7B98F] dark:border-[#3a352b] rounded-full p-4 transition"
+      aria-label="Toggle dark mode"
+      className={`w-11 h-11 rounded-md border border-[#C7B98F] dark:border-[#3a352b] bg-[#F8F4EA] dark:bg-[#221F1A] shadow flex items-center justify-center shrink-0 transition hover:border-[#B23A2E] ${className}`}
     >
       {darkMode ? (
-        <Sun className="text-[#D9A441]" />
+        <Sun size={18} className="text-[#D9A441]" />
       ) : (
-        <Moon className="text-[#24322E]" />
+        <Moon size={18} className="text-[#24322E] dark:text-[#EFE7D6]" />
       )}
     </button>
   );

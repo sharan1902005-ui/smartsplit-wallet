@@ -6,6 +6,7 @@ import { db } from "../firebase/config";
 import { calculateSettlements } from "../utils/settlement";
 import MemberAvatar from "../components/MemberAvatar";
 import { getMemberName } from "../utils/memberDisplay";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function Settlement() {
   const { id } = useParams();
@@ -39,13 +40,16 @@ export default function Settlement() {
   return (
     <div className="min-h-screen bg-[#EAE1CC] dark:bg-[#171512] text-[#24322E] dark:text-[#EFE7D6] px-6 py-10">
       <div className="max-w-4xl mx-auto">
-        <Link
-          to={`/group/${id}`}
-          className="inline-flex items-center gap-2 text-[#B23A2E] font-bold mb-6"
-        >
-          <ChevronLeft size={18} />
-          Back to {group.name}
-        </Link>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <Link
+            to={`/group/${id}`}
+            className="inline-flex items-center gap-2 text-[#B23A2E] font-bold"
+          >
+            <ChevronLeft size={18} />
+            Back to {group.name}
+          </Link>
+          <ThemeToggle />
+        </div>
 
         <div className="bg-[#F8F4EA] dark:bg-[#221F1A] backdrop-blur-xl border border-[#C7B98F] dark:border-[#3a352b] rounded-md shadow-2xl p-8">
           <div className="flex items-center gap-4 mb-8">

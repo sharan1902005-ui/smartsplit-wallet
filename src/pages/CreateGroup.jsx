@@ -4,6 +4,7 @@ import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { Luggage, ShieldCheck, Plane } from "lucide-react";
 import { cleanDisplayName } from "../utils/memberDisplay";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function CreateGroup() {
   const [groupName, setGroupName] = useState("");
@@ -68,19 +69,22 @@ export default function CreateGroup() {
     <div className="min-h-screen bg-[#EAE1CC] dark:bg-[#171512] flex justify-center items-center px-4 py-12">
       <div className="bg-[#F8F4EA] dark:bg-[#221F1A] backdrop-blur-xl border border-[#C7B98F] dark:border-[#3a352b] p-10 rounded-md w-full max-w-2xl shadow-2xl">
 
-        <div className="flex items-center gap-4 mb-2">
-          <div className="bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] p-4 rounded-md shadow-xl">
-            <Luggage size={26} />
-          </div>
+        <div className="flex items-start justify-between gap-4 mb-2">
+          <div className="flex items-center gap-4">
+            <div className="bg-[#B23A2E] hover:bg-[#9a3227] text-[#F8F4EA] p-4 rounded-md shadow-xl">
+              <Luggage size={26} />
+            </div>
 
-          <div>
-            <p className="text-sm font-semibold text-[#B23A2E] uppercase tracking-widest">
-              Issue new ticket
-            </p>
-            <h1 className="text-4xl font-black text-[#24322E] dark:text-[#EFE7D6]">
-              Create group
-            </h1>
+            <div>
+              <p className="text-sm font-semibold text-[#B23A2E] uppercase tracking-widest">
+                Issue new ticket
+              </p>
+              <h1 className="text-4xl font-black text-[#24322E] dark:text-[#EFE7D6]">
+                Create group
+              </h1>
+            </div>
           </div>
+          <ThemeToggle />
         </div>
 
         <div className="h-px bg-[#C7B98F] dark:bg-[#3a352b] my-6" />
