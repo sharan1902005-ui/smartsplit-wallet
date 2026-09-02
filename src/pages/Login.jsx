@@ -9,8 +9,6 @@ import { auth, db } from "../firebase/config";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { Wallet, ShieldCheck, Sparkles } from "lucide-react";
-import { cleanDisplayName } from "../utils/memberDisplay";
-import ThemeToggle from "../components/ThemeToggle";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -29,7 +27,7 @@ export default function Login() {
       const user = result.user;
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
-        name: cleanDisplayName(user.displayName, "User"),
+        name: user.displayName || "User",
         email: user.email || "",
         photo: user.photoURL || "",
       }, { merge: true });
@@ -58,7 +56,7 @@ export default function Login() {
       const user = result.user;
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
-        name: cleanDisplayName(user.displayName || email.split("@")[0], "User"),
+        name: user.displayName || email.split("@")[0],
         email: user.email || "",
         photo: user.photoURL || "",
       }, { merge: true });
@@ -134,19 +132,16 @@ export default function Login() {
       </div>
 
       {/* RIGHT LOGIN */}
-      <div className="w-full md:w-1/2 flex items-center justify-center px-8">
+      <div className="w-full md:w-1/2 flex items-center justify-center px-4 py-10 md:px-8">
         <div className="w-full max-w-md bg-[#F8F4EA] dark:bg-[#221F1A] backdrop-blur-xl border border-[#C7B98F] dark:border-[#3a352b] rounded-md shadow-2xl p-10">
 
           <div className="mb-8">
-            <div className="flex items-center justify-between gap-4 mb-4">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-4">
                 <ShieldCheck className="text-[#B23A2E]" />
                 <span className="text-sm font-semibold text-[#B23A2E] uppercase tracking-widest">
                   Secure Login
                 </span>
               </div>
-              <ThemeToggle />
-            </div>
 
             <h2 className="text-4xl font-black text-[#24322E] dark:text-[#EFE7D6]">
               {isSignup ? "Create account" : "Welcome back"}
