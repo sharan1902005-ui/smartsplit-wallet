@@ -7,6 +7,8 @@ import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   onAuthStateChanged,
+  browserLocalPersistence,
+  setPersistence,
 } from "firebase/auth";
 import { auth, db } from "../firebase/config";
 import { doc, setDoc } from "firebase/firestore";
@@ -54,11 +56,15 @@ export default function Login() {
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
-      if (isMobile) {
+      await setPersistence(auth, browserLocalPersistence);
+      let result;
+      try {
+        result = await signInWithPopup(auth, googleProvider);
+      } catch (popupError) {
+        if (!isMobile) throw popupError;
         await signInWithRedirect(auth, googleProvider);
-        return; // page will redirect, no further code runs
+        return;
       }
-      const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       await saveUser(user);
       navigate("/dashboard");
@@ -77,6 +83,7 @@ export default function Login() {
 
     try {
       setLoading(true);
+      await setPersistence(auth, browserLocalPersistence);
       let result;
       if (isSignup) {
         result = await createUserWithEmailAndPassword(auth, email, password);
