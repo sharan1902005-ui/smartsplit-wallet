@@ -1,6 +1,8 @@
-﻿import { useState } from "react";
+﻿import { useState, useEffect } from "react";
 import {
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -19,10 +21,34 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const googleProvider = new GoogleAuthProvider();
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  useEffect(() => {
+    setLoading(true);
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          const user = result.user;
+          await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            name: user.displayName || "User",
+            email: user.email || "",
+            photo: user.photoURL || "",
+          }, { merge: true });
+          navigate("/dashboard");
+        }
+      })
+      .catch((err) => alert(err.message))
+      .finally(() => setLoading(false));
+  }, []);
 
   const signInWithGoogle = async () => {
     try {
       setLoading(true);
+      if (isMobile) {
+        await signInWithRedirect(auth, googleProvider);
+        return; // page will redirect, no further code runs
+      }
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       await setDoc(doc(db, "users", user.uid), {
