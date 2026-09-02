@@ -6,7 +6,7 @@ import {
   onSnapshot,
   doc,
 } from "firebase/firestore";
-import { signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { db, auth } from "../firebase/config";
 import {
   Wallet,
@@ -33,10 +33,26 @@ export default function Dashboard() {
   const [expenseAmount, setExpenseAmount] = useState("");
   const [expenseCategory, setExpenseCategory] = useState("Food");
   const [selectedGroup, setSelectedGroup] = useState(null);
+  const [user, setUser] = useState(null);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setAuthReady(true);
+      if (!currentUser) {
+        navigate("/login", { replace: true });
+      }
+    });
+
+    return unsubscribe;
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+
     const unsub = onSnapshot(collection(db, "groups"), (snap) => {
-      const uid = auth.currentUser?.uid;
+      const uid = user.uid;
       if (!uid) return;
 
       const filtered = snap.docs
@@ -49,7 +65,7 @@ export default function Dashboard() {
     });
 
     return () => unsub();
-  }, []);
+  }, [user]);
 
   const totals = useMemo(() => {
     let wallet = 0;
@@ -120,7 +136,13 @@ export default function Dashboard() {
     navigate("/login");
   };
 
-  const user = auth.currentUser;
+  if (!authReady) {
+    return (
+      <div className="min-h-screen bg-[#EAE1CC] dark:bg-[#171512] text-[#24322E] dark:text-[#EFE7D6] flex items-center justify-center p-6">
+        <p className="font-bold">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#EAE1CC] dark:bg-[#171512] text-[#24322E] dark:text-[#EFE7D6] p-6 md:p-8">

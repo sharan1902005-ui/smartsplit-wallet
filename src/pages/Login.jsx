@@ -6,6 +6,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { auth, db } from "../firebase/config";
 import { doc, setDoc } from "firebase/firestore";
@@ -23,23 +24,31 @@ export default function Login() {
   const googleProvider = new GoogleAuthProvider();
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
+  const saveUser = async (user, fallbackName = "User") => {
+    await setDoc(doc(db, "users", user.uid), {
+      uid: user.uid,
+      name: user.displayName || fallbackName,
+      email: user.email || "",
+      photo: user.photoURL || "",
+    }, { merge: true });
+  };
+
   useEffect(() => {
     setLoading(true);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        await saveUser(user, user.email?.split("@")[0] || "User");
+        navigate("/dashboard", { replace: true });
+      }
+      setLoading(false);
+    });
+
     getRedirectResult(auth)
-      .then(async (result) => {
-        if (result?.user) {
-          const user = result.user;
-          await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            name: user.displayName || "User",
-            email: user.email || "",
-            photo: user.photoURL || "",
-          }, { merge: true });
-          navigate("/dashboard");
-        }
-      })
+      .then((result) => result?.user && saveUser(result.user))
       .catch((err) => alert(err.message))
       .finally(() => setLoading(false));
+
+    return unsubscribe;
   }, []);
 
   const signInWithGoogle = async () => {
@@ -51,12 +60,7 @@ export default function Login() {
       }
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        name: user.displayName || "User",
-        email: user.email || "",
-        photo: user.photoURL || "",
-      }, { merge: true });
+      await saveUser(user);
       navigate("/dashboard");
     } catch (err) {
       alert(err.message);
@@ -80,12 +84,7 @@ export default function Login() {
         result = await signInWithEmailAndPassword(auth, email, password);
       }
       const user = result.user;
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        name: user.displayName || email.split("@")[0],
-        email: user.email || "",
-        photo: user.photoURL || "",
-      }, { merge: true });
+      await saveUser(user, email.split("@")[0]);
       navigate("/dashboard");
     } catch (err) {
       alert(err.message);
